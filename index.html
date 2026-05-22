@@ -539,6 +539,20 @@
             <option value="Tentative">Tentative</option>
             <option value="Booked">Booked</option>
           </select>
+
+          <!-- View Toggle -->
+          <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto">
+            <button onclick="setPhotographerLayout('grid')" id="btn-layout-grid"
+              class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm">
+              <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+              <span>Grid</span>
+            </button>
+            <button onclick="setPhotographerLayout('table')" id="btn-layout-table"
+              class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 hover:text-slate-800">
+              <i data-lucide="table" class="w-3.5 h-3.5"></i>
+              <span>Table</span>
+            </button>
+          </div>
         </div>
 
         <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -555,9 +569,9 @@
         </div>
       </div>
 
-      <!-- Photographers Grid Container -->
-      <div id="photographers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Rendered dynamically -->
+      <!-- Photographers View Container -->
+      <div id="photographers-view-container" class="transition-all duration-300">
+        <!-- Rendered dynamically as grid or table -->
       </div>
 
     </section>
@@ -1883,6 +1897,7 @@
       tasks: [],
       expenses: [],
       expenseBudget: 500000,
+      photographerLayout: 'grid', // 'grid' or 'table'
       filters: {
         photoSearch: '',
         photoStatus: 'All',
@@ -2517,10 +2532,125 @@
       document.getElementById("sprint-meter-bar").style.width = `${sprintPercentage}%`;
     }
 
+    // HELPERS: RENDER PHOTOGRAPHER TABLE VIEW
+    function renderPhotographerTable(list, rank1Id) {
+      const container = document.getElementById("photographers-view-container");
+      const tableWrapper = document.createElement('div');
+      tableWrapper.className = 'overflow-x-auto bg-white border border-slate-200 rounded-3xl shadow-sm';
+      
+      const statusColors = {
+        'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+        'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+        'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
+        'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
+      };
+
+      let tbodyContent = '';
+      list.forEach(p => {
+        const isRank1 = p.id === rank1Id;
+        const totalPricingFormatted = parseFloat(p.totalPricing || 0).toLocaleString('en-IN');
+        
+        tbodyContent += `
+          <tr class="hover:bg-slate-50/80 transition border-b border-slate-100 text-slate-700">
+            <td class="px-6 py-4">
+              <div>
+                <div class="font-semibold text-slate-900 text-sm flex items-center gap-1.5">
+                  ${p.studio}
+                  ${isRank1 ? `
+                    <span class="inline-flex items-center gap-0.5 bg-indigo-650 text-white font-bold text-[9px] uppercase font-mono px-2 py-0.5 rounded-full shadow-sm">
+                      <i data-lucide="crown" class="w-2.5 h-2.5"></i> Rank 1
+                    </span>
+                  ` : ''}
+                </div>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-xs text-slate-500 font-mono">${p.leadName || 'No Lead'}</span>
+                  ${p.instagram ? `
+                    <span class="text-slate-300">•</span>
+                    <a href="https://instagram.com/${p.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-0.5 text-[10px] text-indigo-650 hover:underline font-mono">
+                      <i data-lucide="instagram" class="w-2.5 h-2.5"></i> ${p.instagram}
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-xs font-mono text-slate-500">${p.location || 'N/A'}</td>
+            <td class="px-6 py-4">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${statusColors[p.status] || 'bg-slate-50 text-slate-650 border-slate-200'}">${p.status || 'Inquiry'}</span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3 font-mono text-xs">
+                <div>
+                  <span class="text-[9px] text-slate-400 block uppercase">Gear</span>
+                  <span class="font-bold text-slate-700">${p.eqScore}</span>
+                </div>
+                <div>
+                  <span class="text-[9px] text-slate-400 block uppercase">Price</span>
+                  <span class="font-bold text-slate-700">${p.prScore}</span>
+                </div>
+                <div class="border-l border-slate-200 pl-2">
+                  <span class="text-[9px] text-indigo-600 block uppercase font-bold">Score</span>
+                  <span class="font-black text-indigo-700">${p.finalScore}</span>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-right font-semibold text-slate-800 font-mono">₹${totalPricingFormatted}</td>
+            <td class="px-6 py-4 text-right font-medium text-slate-700 font-mono">${p.advancePaid || 0}%</td>
+            <td class="px-6 py-4 text-right font-medium text-slate-700">${p.teamSize || 1} Persons</td>
+            <td class="px-6 py-4 text-xs text-slate-650">${p.albumIncluded || 'No'}</td>
+            <td class="px-6 py-4">
+              <div class="flex items-center justify-center gap-2">
+                <button onclick="editPhotographer('${p.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl transition shadow-sm cursor-pointer" title="Edit">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="deletePhotographerDialog('${p.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 hover:text-rose-700 rounded-xl transition shadow-sm cursor-pointer" title="Delete">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tableWrapper.innerHTML = `
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-mono text-[10px] uppercase font-bold tracking-wider">
+              <th class="px-6 py-4">Studio / Lead</th>
+              <th class="px-6 py-4">Location</th>
+              <th class="px-6 py-4">Status</th>
+              <th class="px-6 py-4">Score Metrics</th>
+              <th class="px-6 py-4 text-right">Pricing</th>
+              <th class="px-6 py-4 text-right">Advance %</th>
+              <th class="px-6 py-4 text-right">Team Size</th>
+              <th class="px-6 py-4">Album</th>
+              <th class="px-6 py-4 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-700">
+            ${tbodyContent}
+          </tbody>
+        </table>
+      `;
+      container.appendChild(tableWrapper);
+    }
+
     // RENDER: PHOTOGRAPHER MATRIX
     function renderPhotographerMatrix(photoObj) {
-      const grid = document.getElementById("photographers-grid");
-      grid.innerHTML = '';
+      // Sync layout buttons UI
+      const btnGrid = document.getElementById("btn-layout-grid");
+      const btnTable = document.getElementById("btn-layout-table");
+      if (btnGrid && btnTable) {
+        if (state.photographerLayout === 'grid') {
+          btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm";
+          btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 hover:text-slate-800";
+        } else {
+          btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 hover:text-slate-800";
+          btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm";
+        }
+      }
+
+      const container = document.getElementById("photographers-view-container");
+      container.innerHTML = '';
 
       let list = photoObj.list;
 
@@ -2535,117 +2665,125 @@
       });
 
       if (list.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-full py-12 text-center text-slate-500 border border-dashed border-slate-800 rounded-3xl">
-            <i data-lucide="camera-off" class="w-8 h-8 mx-auto mb-2 text-slate-600"></i>
-            <p class="text-sm">No photographers match the filters.</p>
+        container.innerHTML = `
+          <div class="w-full py-12 text-center text-slate-500 border border-dashed border-slate-200 rounded-3xl bg-white shadow-sm">
+            <i data-lucide="camera-off" class="w-8 h-8 mx-auto mb-2 text-slate-400"></i>
+            <p class="text-sm font-medium">No photographers match the filters.</p>
           </div>
         `;
         return;
       }
 
-      list.forEach(p => {
-        const isRank1 = p.id === photoObj.rank1Id;
-        const statusColors = {
-          'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
-          'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
-          'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
-          'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
-        };
+      if (state.photographerLayout === 'grid') {
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
 
-        const card = document.createElement('div');
-        card.className = `relative bg-white border ${isRank1 ? 'border-indigo-500 pulse-glow' : 'border-slate-200'} rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between`;
+        list.forEach(p => {
+          const isRank1 = p.id === photoObj.rank1Id;
+          const statusColors = {
+            'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+            'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+            'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
+            'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
+          };
 
-        card.innerHTML = `
-          <div>
-            <!-- Top badges -->
-            <div class="flex items-center justify-between mb-4">
-              <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${statusColors[p.status]}">${p.status}</span>
-              ${isRank1 ? `
-                <span class="flex items-center gap-1 bg-indigo-650 text-white font-bold text-[10px] uppercase font-mono px-2.5 py-1 rounded-full shadow-sm">
-                  <i data-lucide="crown" class="w-3 h-3"></i> Rank 1
-                </span>
+          const card = document.createElement('div');
+          card.className = `relative bg-white border ${isRank1 ? 'border-indigo-500 pulse-glow' : 'border-slate-200'} rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between`;
+
+          card.innerHTML = `
+            <div>
+              <!-- Top badges -->
+              <div class="flex items-center justify-between mb-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${statusColors[p.status] || 'bg-slate-50 text-slate-650 border-slate-200'}">${p.status || 'Inquiry'}</span>
+                ${isRank1 ? `
+                  <span class="flex items-center gap-1 bg-indigo-650 text-white font-bold text-[10px] uppercase font-mono px-2.5 py-1 rounded-full shadow-sm">
+                    <i data-lucide="crown" class="w-3 h-3"></i> Rank 1
+                  </span>
+                ` : ''}
+              </div>
+
+              <!-- Header details -->
+              <h4 class="text-lg font-bold text-slate-900">${p.studio}</h4>
+              <p class="text-xs text-slate-500 font-mono mt-0.5">${p.leadName} • ${p.location}</p>
+              
+              ${p.instagram ? `
+                <a href="https://instagram.com/${p.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-indigo-650 hover:underline font-mono mt-1.5">
+                  <i data-lucide="instagram" class="w-3 h-3"></i> ${p.instagram}
+                </a>
               ` : ''}
-            </div>
 
-            <!-- Header details -->
-            <h4 class="text-lg font-bold text-slate-900">${p.studio}</h4>
-            <p class="text-xs text-slate-500 font-mono mt-0.5">${p.leadName} • ${p.location}</p>
-            
-            ${p.instagram ? `
-              <a href="https://instagram.com/${p.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-indigo-600 hover:underline font-mono mt-1.5">
-                <i data-lucide="instagram" class="w-3 h-3"></i> ${p.instagram}
-              </a>
-            ` : ''}
-
-            <!-- Score Display -->
-            <div class="grid grid-cols-3 gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-3 my-4 font-mono text-center shadow-sm">
-              <div>
-                <span class="text-[9px] text-slate-500 uppercase">Gear</span>
-                <div class="text-sm font-bold text-slate-750 mt-0.5">${p.eqScore}</div>
-              </div>
-              <div>
-                <span class="text-[9px] text-slate-500 uppercase">Price</span>
-                <div class="text-sm font-bold text-slate-750 mt-0.5">${p.prScore}</div>
-              </div>
-              <div class="border-l border-slate-200">
-                <span class="text-[9px] text-indigo-600 uppercase font-bold">Score</span>
-                <div class="text-sm font-black text-indigo-700 mt-0.5">${p.finalScore}</div>
-              </div>
-            </div>
-
-            <!-- Pricing Details -->
-            <div class="space-y-1.5 text-xs text-slate-650 border-b border-slate-100 pb-3 mb-3">
-              <div class="flex justify-between">
-                <span class="text-slate-500">Total Price:</span>
-                <span class="font-semibold text-slate-800 font-mono">₹${parseFloat(p.totalPricing).toLocaleString('en-IN')}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-500">Advance %:</span>
-                <span class="font-semibold text-slate-800 font-mono">${p.advancePaid || 0}%</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-500">Team Size:</span>
-                <span class="font-semibold text-slate-800">${p.teamSize || 1} Persons</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-500">Album Included:</span>
-                <span class="font-semibold text-slate-800">${p.albumIncluded || 'No'}</span>
-              </div>
-            </div>
-
-            <!-- Tech Details -->
-            <div class="space-y-2 text-xs mb-4">
-              <div>
-                <span class="text-[10px] font-mono text-slate-500 uppercase font-bold">Gear Specs:</span>
-                <p class="text-slate-700 leading-relaxed mt-0.5 truncate" title="${p.equipment || 'None'}">${p.equipment || 'None'}</p>
-              </div>
-              <div>
-                <span class="text-[10px] font-mono text-slate-500 uppercase font-bold">Deliverables:</span>
-                <p class="text-slate-700 leading-relaxed mt-0.5 truncate" title="${p.deliverables || 'None'}">${p.deliverables || 'None'}</p>
-              </div>
-              ${p.remarks ? `
+              <!-- Score Display -->
+              <div class="grid grid-cols-3 gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-3 my-4 font-mono text-center shadow-sm">
                 <div>
-                  <span class="text-[10px] font-mono text-slate-500 uppercase font-bold">Notes:</span>
-                  <p class="text-slate-500 leading-relaxed mt-0.5 italic truncate" title="${p.remarks}">${p.remarks}</p>
+                  <span class="text-[9px] text-slate-500 uppercase">Gear</span>
+                  <div class="text-sm font-bold text-slate-750 mt-0.5">${p.eqScore}</div>
                 </div>
-              ` : ''}
-            </div>
-          </div>
+                <div>
+                  <span class="text-[9px] text-slate-500 uppercase">Price</span>
+                  <div class="text-sm font-bold text-slate-750 mt-0.5">${p.prScore}</div>
+                </div>
+                <div class="border-l border-slate-200">
+                  <span class="text-[9px] text-indigo-600 uppercase font-bold">Score</span>
+                  <div class="text-sm font-black text-indigo-700 mt-0.5">${p.finalScore}</div>
+                </div>
+              </div>
 
-          <!-- Actions -->
-          <div class="flex gap-2 border-t border-slate-100 pt-3">
-            <button onclick="editPhotographer('${p.id}')" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs transition shadow-sm">
-              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-              <span>Edit</span>
-            </button>
-            <button onclick="deletePhotographerDialog('${p.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 hover:text-rose-700 rounded-xl text-xs transition shadow-sm">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
+              <!-- Pricing Details -->
+              <div class="space-y-1.5 text-xs text-slate-650 border-b border-slate-100 pb-3 mb-3">
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Total Price:</span>
+                  <span class="font-semibold text-slate-800 font-mono">₹${parseFloat(p.totalPricing).toLocaleString('en-IN')}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Advance %:</span>
+                  <span class="font-semibold text-slate-800 font-mono">${p.advancePaid || 0}%</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Team Size:</span>
+                  <span class="font-semibold text-slate-800">${p.teamSize || 1} Persons</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Album Included:</span>
+                  <span class="font-semibold text-slate-800">${p.albumIncluded || 'No'}</span>
+                </div>
+              </div>
+
+              <!-- Tech Details -->
+              <div class="space-y-2 text-xs mb-4">
+                <div>
+                  <span class="text-[10px] font-mono text-slate-500 uppercase font-bold">Gear Specs:</span>
+                  <p class="text-slate-700 leading-relaxed mt-0.5 truncate" title="${p.equipment || 'None'}">${p.equipment || 'None'}</p>
+                </div>
+                <div>
+                  <span class="text-[10px] font-mono text-slate-500 uppercase font-bold">Deliverables:</span>
+                  <p class="text-slate-700 leading-relaxed mt-0.5 truncate" title="${p.deliverables || 'None'}">${p.deliverables || 'None'}</p>
+                </div>
+                ${p.remarks ? `
+                  <div>
+                    <span class="text-[10px] font-mono text-slate-500 uppercase font-bold">Notes:</span>
+                    <p class="text-slate-500 leading-relaxed mt-0.5 italic truncate" title="${p.remarks}">${p.remarks}</p>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2 border-t border-slate-100 pt-3">
+              <button onclick="editPhotographer('${p.id}')" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs transition shadow-sm cursor-pointer">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                <span>Edit</span>
+              </button>
+              <button onclick="deletePhotographerDialog('${p.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 hover:text-rose-700 rounded-xl text-xs transition shadow-sm cursor-pointer">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          `;
+          gridDiv.appendChild(card);
+        });
+        container.appendChild(gridDiv);
+      } else {
+        renderPhotographerTable(list, photoObj.rank1Id);
+      }
     }
 
     // RENDER: SHOPPING REGISTRY
@@ -3145,6 +3283,11 @@
           }
         }
       );
+    };
+
+    window.setPhotographerLayout = function (layout) {
+      state.photographerLayout = layout;
+      triggerAllRenders();
     };
 
     // SHOPPING CRUD ACTIONS

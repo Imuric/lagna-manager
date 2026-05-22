@@ -1355,6 +1355,26 @@
     <!-- Toasts injected dynamically -->
   </div>
 
+  <!-- Live Cloud Database Connection Config -->
+  <script>
+    // To sync data live between your laptop, phone, and other devices:
+    // 1. Create a free Firebase project at: https://console.firebase.google.com/
+    // 2. Enable Firestore Database in "Test Mode" (or custom rules).
+    // 3. Register a Web App in your Firebase project and uncomment/paste the config below.
+    // 4. Push the changes to GitHub and Vercel/GitHub Pages will redeploy.
+    window.__firebase_config = {
+      /*
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+      */
+    };
+    window.__app_id = 'lagna-manager-core';
+  </script>
+
   <!-- Main Controller Module Script -->
   <script type="module">
     // Firebase CDN imports (v10.8.0)

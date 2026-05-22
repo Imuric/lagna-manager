@@ -136,11 +136,33 @@
           <span id="sync-text" class="text-slate-600">Connecting...</span>
         </div>
 
+        <!-- Google Auth Button (shown when logged out) -->
+        <button id="btn-google-login" onclick="handleGoogleSignIn()"
+          class="hidden items-center gap-2 px-4 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-indigo-300 text-slate-700 font-medium text-sm transition-all duration-200 shadow-sm">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          <span>Login to Edit</span>
+        </button>
+
+        <!-- User Avatar (shown when logged in with Google) -->
+        <div id="user-avatar-pill" class="hidden items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-mono cursor-default">
+          <img id="user-avatar-img" src="" alt="" class="w-5 h-5 rounded-full object-cover">
+          <span id="user-display-name" class="text-emerald-700 font-semibold max-w-[100px] truncate"></span>
+          <button onclick="handleGoogleSignOut()" title="Sign out"
+            class="ml-1 text-slate-400 hover:text-rose-500 transition-colors">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
         <!-- Share workspace link -->
         <button onclick="copyWorkspaceLink()"
           class="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 hover:border-indigo-300 text-indigo-600 font-medium text-sm transition-all duration-200 shadow-sm">
           <i data-lucide="share-2" class="w-4 h-4"></i>
-          <span>Share WhatsApp Link</span>
+          <span>Share</span>
         </button>
       </div>
     </div>
@@ -1357,12 +1379,8 @@
 
   <!-- Live Cloud Database Connection Config -->
   <script>
-    // To sync data live between your laptop, phone, and other devices:
-    // 1. Create a free Firebase project at: https://console.firebase.google.com/
-    // 2. Enable Firestore Database in "Test Mode" (or custom rules).
-    // 3. Register a Web App in your Firebase project and uncomment/paste the config below.
-    // 4. Push the changes to GitHub and Vercel/GitHub Pages will redeploy.
-    const firebaseConfig = {
+
+    window.__firebase_config = {
       apiKey: "AIzaSyDFDh-rzR9Q1xBz2JVECwAMae3hLwWB8KI",
       authDomain: "lagna-manager.firebaseapp.com",
       projectId: "lagna-manager",
@@ -1379,7 +1397,7 @@
   <script type="module">
     // Firebase CDN imports (v10.8.0)
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-    import { getAuth, signInWithCustomToken, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { getAuth, signInWithCustomToken, signInAnonymously, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
     import { getFirestore, doc, collection, getDocs, setDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
     // ==========================================
@@ -1867,6 +1885,9 @@
       if (status === 'connected') {
         dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-emerald-500';
         container.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/20 border border-emerald-500/20 text-xs font-mono text-emerald-400';
+      } else if (status === 'readonly') {
+        dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-amber-400';
+        container.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-xs font-mono text-amber-600';
       } else if (status === 'mock') {
         dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-cyan-500';
         container.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-950/20 border border-cyan-500/20 text-xs font-mono text-cyan-400';
@@ -1880,6 +1901,85 @@
     // ==========================================
     // COLLABORATIVE DATABASE WRAPPER
     // ==========================================
+    // ==========================================
+    // GLOBAL AUTH STATE
+    // ==========================================
+    let isGoogleUser = false;
+
+    function updateAuthUI(user) {
+      const loginBtn = document.getElementById('btn-google-login');
+      const avatarPill = document.getElementById('user-avatar-pill');
+      const avatarImg = document.getElementById('user-avatar-img');
+      const displayName = document.getElementById('user-display-name');
+
+      if (user && user.providerData && user.providerData.length > 0 && user.providerData[0].providerId === 'google.com') {
+        isGoogleUser = true;
+        loginBtn.classList.add('hidden');
+        loginBtn.classList.remove('flex');
+        avatarPill.classList.remove('hidden');
+        avatarPill.classList.add('flex');
+        avatarImg.src = user.photoURL || '';
+        displayName.textContent = user.displayName ? user.displayName.split(' ')[0] : user.email;
+        updateSyncStatus('connected', `Synced · ${user.displayName ? user.displayName.split(' ')[0] : 'Editor'}`);
+      } else {
+        isGoogleUser = false;
+        loginBtn.classList.remove('hidden');
+        loginBtn.classList.add('flex');
+        avatarPill.classList.add('hidden');
+        avatarPill.classList.remove('flex');
+        if (!dbHelper || dbHelper.isMock) return;
+        updateSyncStatus('readonly', 'Read-Only (Guest)');
+      }
+      // Re-render to update button states
+      triggerAllRenders();
+      lucide.createIcons();
+    }
+
+    function updateSyncStatusReadOnly() {
+      updateSyncStatus('readonly', 'Read-Only (Guest)');
+    }
+
+    window.handleGoogleSignIn = async function() {
+      if (!dbHelper || !dbHelper.auth) {
+        showToast('Firebase not connected. Cannot sign in.', 'error');
+        return;
+      }
+      try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(dbHelper.auth, provider);
+      } catch (e) {
+        console.error('Google sign-in failed:', e);
+        showToast('Sign-in failed. Please try again.', 'error');
+      }
+    };
+
+    window.handleGoogleSignOut = async function() {
+      if (!dbHelper || !dbHelper.auth) return;
+      try {
+        await signOut(dbHelper.auth);
+        // Re-sign in anonymously for read access
+        await signInAnonymously(dbHelper.auth);
+        showToast('Signed out. You can still view all data.', 'success');
+      } catch (e) {
+        console.error('Sign-out failed:', e);
+      }
+    };
+
+    // Guard function — call before any write operation
+    function requireGoogleAuth() {
+      if (!isGoogleUser) {
+        showToast('🔒 Login with Google to make changes.', 'error');
+        // Flash the login button
+        const btn = document.getElementById('btn-google-login');
+        if (btn) {
+          btn.classList.add('ring-2', 'ring-indigo-400', 'scale-105');
+          setTimeout(() => btn.classList.remove('ring-2', 'ring-indigo-400', 'scale-105'), 1000);
+        }
+        return false;
+      }
+      return true;
+    }
+
     class CollaborativeDB {
       constructor() {
         this.isMock = true;
@@ -1912,7 +2012,12 @@
             this.auth = getAuth(app);
             this.isMock = false;
 
-            // Auth Priority lifecycle
+            // Listen to auth state changes (handles login/logout/Google sign-in)
+            onAuthStateChanged(this.auth, (user) => {
+              updateAuthUI(user);
+            });
+
+            // Auth Priority lifecycle — start anonymous for read access
             if (typeof window.__initial_auth_token !== 'undefined' && window.__initial_auth_token) {
               await signInWithCustomToken(this.auth, window.__initial_auth_token);
             } else {
@@ -2788,6 +2893,7 @@
 
     // PHOTOGRAPHER CRUD ACTION TRIGGERS
     window.openPhotographerModal = function (id = '') {
+      if (!requireGoogleAuth()) return;
       const modal = document.getElementById('modal-photographer');
       const form = document.getElementById('form-photographer');
       form.reset();
@@ -2828,6 +2934,7 @@
 
     window.savePhotographer = async function (e) {
       e.preventDefault();
+      if (!requireGoogleAuth()) return;
       const id = document.getElementById('photo-id').value;
       const record = {
         studio: document.getElementById('photo-studio').value,
@@ -2859,6 +2966,7 @@
     };
 
     window.deletePhotographerDialog = function (id) {
+      if (!requireGoogleAuth()) return;
       triggerCustomConfirm(
         'Delete Photographer?',
         'Are you sure you want to remove this photographer candidate from evaluation?',
@@ -2875,6 +2983,7 @@
 
     // SHOPPING CRUD ACTIONS
     window.openShoppingModal = function (id = '') {
+      if (!requireGoogleAuth()) return;
       const modal = document.getElementById('modal-shopping');
       const form = document.getElementById('form-shopping');
       form.reset();
@@ -2907,6 +3016,7 @@
 
     window.saveShoppingItem = async function (e) {
       e.preventDefault();
+      if (!requireGoogleAuth()) return;
       const id = document.getElementById('shop-id').value;
       const record = {
         name: document.getElementById('shop-name').value,
@@ -2930,6 +3040,7 @@
     };
 
     window.updateShoppingStatus = async function (id, statusVal) {
+      if (!requireGoogleAuth()) return;
       const item = state.shopping.find(x => x.id === id);
       if (!item) return;
       try {
@@ -2941,6 +3052,7 @@
     };
 
     window.deleteShoppingItemDialog = function (id) {
+      if (!requireGoogleAuth()) return;
       triggerCustomConfirm(
         'Delete Sourcing Item?',
         'Remove this item from the wedding procurement list?',
@@ -2957,6 +3069,7 @@
 
     // GUEST LIST CRUD ACTIONS
     window.openGuestModal = function (id = '') {
+      if (!requireGoogleAuth()) return;
       const modal = document.getElementById('modal-guest');
       const form = document.getElementById('form-guest');
       form.reset();
@@ -2990,6 +3103,7 @@
 
     window.saveGuest = async function (e) {
       e.preventDefault();
+      if (!requireGoogleAuth()) return;
       const id = document.getElementById('guest-id').value;
       const record = {
         name: document.getElementById('guest-name').value,
@@ -3014,6 +3128,7 @@
     };
 
     window.updateGuestRsvp = async function (id, rsvpVal) {
+      if (!requireGoogleAuth()) return;
       const guest = state.guests.find(x => x.id === id);
       if (!guest) return;
       try {
@@ -3025,6 +3140,7 @@
     };
 
     window.deleteGuestDialog = function (id) {
+      if (!requireGoogleAuth()) return;
       triggerCustomConfirm(
         'Delete Guest?',
         'Are you sure you want to remove this family from the guest list?',
@@ -3041,6 +3157,7 @@
 
     // AGILE KANBAN CRUD ACTIONS
     window.openTaskModal = function (id = '') {
+      if (!requireGoogleAuth()) return;
       const modal = document.getElementById('modal-task');
       const form = document.getElementById('form-task');
       form.reset();
@@ -3070,6 +3187,7 @@
 
     window.saveTask = async function (e) {
       e.preventDefault();
+      if (!requireGoogleAuth()) return;
       const id = document.getElementById('task-id').value;
       const column = document.getElementById('task-column').value;
       const record = {
@@ -3092,6 +3210,7 @@
     };
 
     window.toggleTaskStatus = async function (id, isCompleted) {
+      if (!requireGoogleAuth()) return;
       const task = state.tasks.find(x => x.id === id);
       if (!task) return;
       try {
@@ -3103,6 +3222,7 @@
     };
 
     window.deleteTaskDialog = function (id) {
+      if (!requireGoogleAuth()) return;
       triggerCustomConfirm(
         'Delete Task?',
         'Remove this item from the timeline checklist?',
@@ -3222,6 +3342,7 @@
 
     // BUDGET ACTIONS
     window.toggleEditBudget = function () {
+      if (!requireGoogleAuth()) return;
       const budgetView = document.getElementById("budget-view");
       const budgetEdit = document.getElementById("budget-edit-input-container");
       const btn = document.getElementById("btn-edit-budget");
@@ -3240,6 +3361,7 @@
     };
 
     window.saveBudget = async function () {
+      if (!requireGoogleAuth()) return;
       const val = parseFloat(document.getElementById("input-expense-budget").value);
       if (isNaN(val) || val < 0) {
         showToast("Please enter a valid budget amount.", "error");
@@ -3256,6 +3378,7 @@
 
     // EXPENSE ACTIONS
     window.updateExpenseStatus = async function (id, statusVal) {
+      if (!requireGoogleAuth()) return;
       const exp = state.expenses.find(x => x.id === id);
       if (!exp) return;
       try {
@@ -3267,6 +3390,7 @@
     };
 
     window.openExpenseModal = function (id = '') {
+      if (!requireGoogleAuth()) return;
       const modal = document.getElementById('modal-expense');
       const form = document.getElementById('form-expense');
       form.reset();
@@ -3300,6 +3424,7 @@
 
     window.saveExpense = async function (e) {
       e.preventDefault();
+      if (!requireGoogleAuth()) return;
       const id = document.getElementById('expense-id').value;
       const record = {
         title: document.getElementById('expense-title').value,
@@ -3324,6 +3449,7 @@
     };
 
     window.deleteExpenseDialog = function (id) {
+      if (!requireGoogleAuth()) return;
       triggerCustomConfirm(
         'Delete Transaction?',
         'Are you sure you want to delete this expense record?',

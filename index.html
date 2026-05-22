@@ -1,0 +1,3354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LagnaManager Pro - Sakharpuda Workspace</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            copper: {
+              DEFAULT: '#4f46e5',
+              light: '#6366f1',
+              dark: '#3730a3',
+            },
+            terracotta: {
+              DEFAULT: '#4f46e5',
+              dark: '#3730a3',
+              royal: '#1e1b4b',
+            },
+            slate: {
+              950: '#f8fafc',
+            }
+          },
+          fontFamily: {
+            sans: ['Geist', 'system-ui', 'sans-serif'],
+            mono: ['Geist Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Geist & Geist Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap"
+    rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Premium custom scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Custom range slider thumb styling for gold/copper look */
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px;
+      width: 18px;
+      border-radius: 50%;
+      background: #4f46e5;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
+      transition: background-color 0.15s ease-in-out;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      background: #6366f1;
+    }
+
+    .pulse-glow {
+      animation: pulseGlow 2s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% {
+        box-shadow: 0 0 5px rgba(79, 70, 229, 0.1);
+        border-color: rgba(79, 70, 229, 0.15);
+      }
+
+      100% {
+        box-shadow: 0 0 12px rgba(79, 70, 229, 0.3);
+        border-color: rgba(79, 70, 229, 0.4);
+      }
+    }
+
+    .tab-active {
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.25);
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50/50 text-slate-700 min-h-screen font-sans antialiased pb-20">
+
+  <!-- Decorative top glowing bar -->
+  <div class="h-1.5 w-full bg-gradient-to-r from-indigo-700 via-indigo-500 to-indigo-400"></div>
+
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-3 shadow-sm">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-sm text-white">
+          <i data-lucide="gem" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-slate-900">
+            LagnaManager
+          </h1>
+          <p class="text-xs text-slate-500 font-mono">Phase 1: Sakharpuda Planner (June 23, 2026)</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+        <!-- Sync Status Indicator -->
+        <div id="sync-status"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs font-mono">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span id="sync-dot" class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+          </span>
+          <span id="sync-text" class="text-slate-600">Connecting...</span>
+        </div>
+
+        <!-- Share workspace link -->
+        <button onclick="copyWorkspaceLink()"
+          class="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 hover:border-indigo-300 text-indigo-600 font-medium text-sm transition-all duration-200 shadow-sm">
+          <i data-lucide="share-2" class="w-4 h-4"></i>
+          <span>Share WhatsApp Link</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 mt-6">
+
+    <!-- Critical Travel Notice Warning Banner -->
+    <div id="travel-alert-banner"
+      class="mb-6 bg-white border border-amber-200 rounded-2xl p-4 sm:p-5 flex items-start gap-4 relative overflow-hidden shadow-sm">
+      <div class="absolute -right-16 -top-16 w-32 h-32 bg-amber-50 rounded-full blur-2xl"></div>
+      <div class="p-3 bg-amber-50 border border-amber-100 text-amber-600 rounded-xl mt-0.5">
+        <i data-lucide="plane-takeoff" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h4 class="text-sm font-bold text-amber-800 tracking-wide uppercase font-mono">⚠️ Travel Critical Operations
+          Warning</h4>
+        <p class="text-slate-600 text-sm mt-1 leading-relaxed">
+          The event manager has an upcoming <span class="font-semibold text-slate-900">China Sourcing Trip (June
+            7–17)</span> and <span class="font-semibold text-slate-900">Birthday (June 12)</span>.
+        </p>
+        <p class="text-amber-700 text-xs mt-1.5 font-medium flex items-center gap-1.5">
+          <i data-lucide="alert-triangle" class="w-3.5 h-3.5 inline"></i>
+          Action Required: Lock all Photographers, Gift Packages, and Shopping Sourcing lists before June 7 departure!
+        </p>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs Flex-container (Scrolls on Mobile) -->
+    <div class="flex border-b border-slate-200 gap-2 overflow-x-auto pb-1 mb-8 scrollbar-thin">
+      <button onclick="switchTab('dashboard')" id="tab-btn-dashboard"
+        class="tab-active flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 whitespace-nowrap">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+        <span>Dashboard</span>
+      </button>
+      <button onclick="switchTab('photographer')" id="tab-btn-photographer"
+        class="text-slate-500 hover:text-slate-800 hover:bg-slate-100 flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 whitespace-nowrap">
+        <i data-lucide="camera" class="w-4 h-4"></i>
+        <span>Photographers</span>
+      </button>
+      <button onclick="switchTab('shopping')" id="tab-btn-shopping"
+        class="text-slate-500 hover:text-slate-800 hover:bg-slate-100 flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 whitespace-nowrap">
+        <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+        <span>Shopping Registry</span>
+      </button>
+      <button onclick="switchTab('guests')" id="tab-btn-guests"
+        class="text-slate-500 hover:text-slate-800 hover:bg-slate-100 flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 whitespace-nowrap">
+        <i data-lucide="users" class="w-4 h-4"></i>
+        <span>Guest List</span>
+      </button>
+      <button onclick="switchTab('sprints')" id="tab-btn-sprints"
+        class="text-slate-500 hover:text-slate-800 hover:bg-slate-100 flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 whitespace-nowrap">
+        <i data-lucide="milestone" class="w-4 h-4"></i>
+        <span>Timeline Tasks</span>
+      </button>
+      <button onclick="switchTab('expenses')" id="tab-btn-expenses"
+        class="text-slate-500 hover:text-slate-800 hover:bg-slate-100 flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 whitespace-nowrap">
+        <i data-lucide="indian-rupee" class="w-4 h-4"></i>
+        <span>Expenses Tracker</span>
+      </button>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TAB 1: EXECUTIVE DASHBOARD                     -->
+    <!-- ============================================== -->
+    <section id="tab-view-dashboard" class="space-y-6">
+
+      <!-- Top Grid: Countdown & Highlight Alerts -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Countdown Widget -->
+        <div
+          class="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[220px] shadow-sm">
+          <div class="absolute right-0 top-0 w-48 h-48 bg-indigo-50/30 rounded-full blur-3xl"></div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-mono text-indigo-600 uppercase tracking-widest font-bold">Countdown to
+                Ceremony</span>
+              <h3 class="text-lg font-semibold text-slate-850 mt-1">Engagement (Sakharpuda)</h3>
+            </div>
+            <div class="p-2 bg-slate-50 border border-slate-100 text-indigo-650 rounded-xl">
+              <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+            </div>
+          </div>
+
+          <!-- Countdown Numbers -->
+          <div class="grid grid-cols-4 gap-3 my-4">
+            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-center shadow-sm">
+              <div id="countdown-days" class="text-3xl sm:text-4xl font-extrabold font-mono text-slate-800">00</div>
+              <div class="text-[10px] text-slate-500 uppercase font-mono mt-1">Days</div>
+            </div>
+            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-center shadow-sm">
+              <div id="countdown-hours" class="text-3xl sm:text-4xl font-extrabold font-mono text-slate-800">00</div>
+              <div class="text-[10px] text-slate-500 uppercase font-mono mt-1">Hours</div>
+            </div>
+            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-center shadow-sm">
+              <div id="countdown-minutes" class="text-3xl sm:text-4xl font-extrabold font-mono text-slate-800">00</div>
+              <div class="text-[10px] text-slate-500 uppercase font-mono mt-1">Mins</div>
+            </div>
+            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-center shadow-sm">
+              <div id="countdown-seconds" class="text-3xl sm:text-4xl font-extrabold font-mono text-slate-800">00</div>
+              <div class="text-[10px] text-slate-500 uppercase font-mono mt-1">Secs</div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-3">
+            <span>Target: June 23, 2026, 09:00 AM</span>
+            <span id="countdown-status" class="text-indigo-650 font-semibold">Awaiting Ceremony</span>
+          </div>
+        </div>
+
+        <!-- Manager Travel & Highlights Card -->
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-mono text-indigo-600 uppercase tracking-widest font-bold">Event Manager
+              Status</span>
+            <div class="p-2 bg-slate-50 border border-slate-100 text-indigo-650 rounded-xl">
+              <i data-lucide="plane" class="w-5 h-5"></i>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center border border-indigo-100 text-indigo-650">
+                <i data-lucide="globe-2" class="w-4.5 h-4.5"></i>
+              </div>
+              <div>
+                <h5 class="text-sm font-semibold text-slate-800">China Sourcing Trip</h5>
+                <p class="text-xs text-indigo-600 font-mono">June 7 - June 17, 2026</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div
+                class="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center border border-pink-100 text-pink-650">
+                <i data-lucide="cake" class="w-4.5 h-4.5"></i>
+              </div>
+              <div>
+                <h5 class="text-sm font-semibold text-slate-800">Manager's Birthday</h5>
+                <p class="text-xs text-pink-600 font-mono">June 12, 2026</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 border-t border-slate-100 pt-3">
+            <span class="text-xs text-slate-500">👑 Top Photographer:</span>
+            <div id="dash-photographer-rank1" class="text-sm font-bold text-indigo-650 mt-0.5">
+              Calculating...
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Progress Indicators Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Sourcing Meter -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-semibold text-slate-700">Sourcing Registry Progress</h4>
+            <span id="sourcing-meter-text" class="text-xs font-mono font-bold text-indigo-600">0/0 Sourced</span>
+          </div>
+          <!-- Progress Bar -->
+          <div class="w-full bg-slate-100 rounded-full h-3.5 border border-slate-200 p-0.5 overflow-hidden">
+            <div id="sourcing-meter-bar"
+              class="bg-gradient-to-r from-indigo-500 to-indigo-600 h-2 rounded-full transition-all duration-500"
+              style="width: 0%"></div>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-2 font-mono flex items-center gap-1">
+            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+            Tracks "Sourced" items in Shopping Registry.
+          </p>
+        </div>
+
+        <!-- RSVP Meter -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-semibold text-slate-700">Guest RSVP Progress</h4>
+            <span id="rsvp-meter-text" class="text-xs font-mono font-bold text-emerald-600">0 / 500 Guests</span>
+          </div>
+          <!-- Progress Bar -->
+          <div class="w-full bg-slate-100 rounded-full h-3.5 border border-slate-200 p-0.5 overflow-hidden">
+            <div id="rsvp-meter-bar"
+              class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-2 rounded-full transition-all duration-500"
+              style="width: 0%"></div>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-2 font-mono flex items-center gap-1">
+            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+            Sums confirmed headcount in Guest List.
+          </p>
+        </div>
+
+        <!-- Task Progress -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-semibold text-slate-700">Timeline Task Progress</h4>
+            <span id="sprint-meter-text" class="text-xs font-mono font-bold text-violet-650">0/0 Tasks</span>
+          </div>
+          <!-- Progress Bar -->
+          <div class="w-full bg-slate-100 rounded-full h-3.5 border border-slate-200 p-0.5 overflow-hidden">
+            <div id="sprint-meter-bar"
+              class="bg-gradient-to-r from-violet-600 to-violet-400 h-2 rounded-full transition-all duration-500"
+              style="width: 0%"></div>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-2 font-mono flex items-center gap-1">
+            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+            Tracks completed items on Timeline Tasks.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Chronology Milestone Panel -->
+      <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+          <i data-lucide="history" class="w-5 h-5 text-indigo-650"></i>
+          <span>Sakharpuda Chronology & Planning Phases</span>
+        </h3>
+
+        <div class="relative pl-6 sm:pl-8 border-l border-slate-200 space-y-8 pb-4 ml-3 sm:ml-4">
+
+          <!-- Phase 1 Milestone -->
+          <div class="relative">
+            <div
+              class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-white border-2 border-indigo-500 flex items-center justify-center text-indigo-600 shadow-sm">
+              <span class="text-[10px] font-bold">1</span>
+            </div>
+            <div>
+              <span
+                class="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-full">Phase
+                1: Active Planning</span>
+              <h4 class="text-base font-bold text-slate-800 mt-1">Pre-Travel Phase (Now - June 6)</h4>
+              <p class="text-sm text-slate-600 mt-1 leading-relaxed">
+                Critical window. Focus on finalizing photographers, vendor locks, sending guest invitations, and
+                initiating fabric shopping.
+              </p>
+            </div>
+          </div>
+
+          <!-- China Trip & Birthday Milestone -->
+          <div class="relative">
+            <div
+              class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-white border-2 border-amber-500 flex items-center justify-center text-amber-600 shadow-sm">
+              <span class="text-[10px] font-bold">2</span>
+            </div>
+            <div>
+              <span
+                class="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-amber-50 text-amber-600 border border-amber-100 rounded-full">Phase
+                2: Sourcing & Delegation</span>
+              <h4 class="text-base font-bold text-slate-800 mt-1">China Sourcing Trip & Birthday (June 7 - 17)</h4>
+              <p class="text-sm text-slate-600 mt-1 leading-relaxed">
+                Event manager on location in China. Delegation activities commence for family cousins, including Rukhwat
+                preparation (traditional decorative exhibits) and coconut wrapping. Celebration for manager's birthday
+                on June 12!
+              </p>
+            </div>
+          </div>
+
+          <!-- Launch Milestone -->
+          <div class="relative">
+            <div
+              class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-white border-2 border-emerald-500 flex items-center justify-center text-emerald-600 shadow-sm">
+              <span class="text-[10px] font-bold">3</span>
+            </div>
+            <div>
+              <span
+                class="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full">Phase
+                3: Event Setup</span>
+              <h4 class="text-base font-bold text-slate-800 mt-1">Event Launch Week (June 18 - 23)</h4>
+              <p class="text-sm text-slate-600 mt-1 leading-relaxed">
+                Immediate pre-event preparations: picking up fresh coconuts, setting up entry Rangoli designs, and
+                configuring Mehendi/welcome layouts.
+              </p>
+            </div>
+          </div>
+
+          <!-- Sakharpuda Ceremony -->
+          <div class="relative">
+            <div
+              class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-indigo-600 border-2 border-indigo-650 flex items-center justify-center text-white shadow-md">
+              <i data-lucide="award" class="w-3.5 h-3.5"></i>
+            </div>
+            <div>
+              <span
+                class="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-indigo-50 text-indigo-650 border border-indigo-100 rounded-full">Ceremony
+                Day</span>
+              <h4 class="text-base font-bold text-indigo-650 mt-1">Engagement (Sakharpuda) Ceremony</h4>
+              <p class="text-sm text-slate-700 mt-1 leading-relaxed font-semibold">
+                June 23, 2026, 09:00 AM. Traditional Marathi Sakharpuda ceremony begins!
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================== -->
+    <!-- TAB 2: PHOTOGRAPHER MATRIX                     -->
+    <!-- ============================================== -->
+    <section id="tab-view-photographer" class="space-y-6 hidden">
+
+      <!-- Weighing Algorithm Card -->
+      <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+        <div class="flex items-center gap-2 mb-4">
+          <i data-lucide="sliders" class="w-5 h-5 text-indigo-650"></i>
+          <h3 class="text-lg font-bold text-slate-800">Photographer Rank Calculator</h3>
+        </div>
+        <p class="text-slate-500 text-xs leading-relaxed mb-6">
+          Adjust the priority weights below. The evaluator dynamically re-allocates percentages to sum to 100% and
+          scores candidates to find the best matching vendor.
+        </p>
+
+        <!-- Three Sliders -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          <!-- Equipment -->
+          <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-semibold text-slate-700">Equipment/Gear Quality</span>
+              <span id="weight-equipment-val" class="text-xs font-mono font-bold text-indigo-650">33.3%</span>
+            </div>
+            <input type="range" id="weight-equipment" min="0" max="100" step="0.1" value="33.3"
+              class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+          </div>
+
+          <!-- Pricing -->
+          <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-semibold text-slate-700">Pricing Weight</span>
+              <span id="weight-pricing-val" class="text-xs font-mono font-bold text-indigo-650">33.3%</span>
+            </div>
+            <input type="range" id="weight-pricing" min="0" max="100" step="0.1" value="33.3"
+              class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+          </div>
+
+          <!-- Subjective Rating -->
+          <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-semibold text-slate-700">Subjective Rating</span>
+              <span id="weight-rating-val" class="text-xs font-mono font-bold text-indigo-650">33.4%</span>
+            </div>
+            <input type="range" id="weight-rating" min="0" max="100" step="0.1" value="33.4"
+              class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Action & Filter Bar -->
+      <div
+        class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+
+          <!-- Search input -->
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="photo-search" placeholder="Search studio / location..."
+              class="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-300 transition">
+          </div>
+
+          <!-- Availability filter -->
+          <select id="photo-filter-status"
+            class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+            <option value="All">All Statuses</option>
+            <option value="Available">Available</option>
+            <option value="Tentative">Tentative</option>
+            <option value="Booked">Booked</option>
+          </select>
+        </div>
+
+        <button onclick="openPhotographerModal()"
+          class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Add Candidate</span>
+        </button>
+      </div>
+
+      <!-- Photographers Grid Container -->
+      <div id="photographers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </section>
+
+    <!-- ============================================== -->
+    <!-- TAB 3: SHOPPING & SOURCING REGISTRY            -->
+    <!-- ============================================== -->
+    <section id="tab-view-shopping" class="space-y-6 hidden">
+
+      <!-- Sourcing Stats Panel -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+          <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Total Sourcing
+            Budget</span>
+          <h4 id="shop-stat-budget" class="text-2xl font-bold text-slate-900 mt-1">₹0.00</h4>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+          <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Sourced Items</span>
+          <h4 id="shop-stat-sourced" class="text-2xl font-bold text-emerald-600 mt-1">0 Items</h4>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+          <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Remaining
+            Allocation</span>
+          <h4 id="shop-stat-remaining" class="text-2xl font-bold text-indigo-600 mt-1">₹0.00</h4>
+        </div>
+
+      </div>
+
+      <!-- Filter & Search Bar -->
+      <div
+        class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <!-- Search -->
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="shop-search" placeholder="Search registry..."
+              class="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-300 transition">
+          </div>
+          <!-- Status -->
+          <select id="shop-filter-status"
+            class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+            <option value="All">All Statuses</option>
+            <option value="Not Started">Not Started</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Sourced">Sourced</option>
+          </select>
+        </div>
+
+        <button onclick="openShoppingModal()"
+          class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Add Sourcing Item</span>
+        </button>
+      </div>
+
+      <!-- Sourcing Table/Card List -->
+      <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-left">
+            <thead>
+              <tr
+                class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-mono uppercase tracking-wider">
+                <th class="py-4 px-6">Item details</th>
+                <th class="py-4 px-6 text-center">Status</th>
+                <th class="py-4 px-6">Quantity</th>
+                <th class="py-4 px-6">Budget (INR)</th>
+                <th class="py-4 px-6">Remarks / Notes</th>
+                <th class="py-4 px-6 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="shopping-table-body" class="divide-y divide-slate-100 text-sm">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================== -->
+    <!-- TAB 4: GUEST LIST MANAGER                      -->
+    <!-- ============================================== -->
+    <section id="tab-view-guests" class="space-y-6 hidden">
+
+      <!-- Guest Stats -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+          <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Total Confirmed</span>
+          <h4 id="guest-stat-confirmed" class="text-2xl font-bold text-emerald-600 mt-1">0 Guests</h4>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+          <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Bride Side RSVPs</span>
+          <h4 id="guest-stat-bride" class="text-2xl font-bold text-rose-600 mt-1">0 Guests</h4>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+          <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Groom Side RSVPs</span>
+          <h4 id="guest-stat-groom" class="text-2xl font-bold text-indigo-600 mt-1">0 Guests</h4>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+          <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Declined RSVPs</span>
+          <h4 id="guest-stat-declined" class="text-2xl font-bold text-slate-500 mt-1">0 Guests</h4>
+        </div>
+
+      </div>
+
+      <!-- Filters & Actions -->
+      <div
+        class="flex flex-col lg:flex-row items-center justify-between gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+          <!-- Search -->
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="guest-search" placeholder="Search guest name / city..."
+              class="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-300 transition">
+          </div>
+          <!-- Side Filter -->
+          <select id="guest-filter-side"
+            class="w-full sm:w-40 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+            <option value="All">All Sides</option>
+            <option value="Bride Side">Bride Side</option>
+            <option value="Groom Side">Groom Side</option>
+          </select>
+          <!-- RSVP Status Filter -->
+          <select id="guest-filter-rsvp"
+            class="w-full sm:w-40 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+            <option value="All">All RSVPs</option>
+            <option value="Invited">Invited</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Declined">Declined</option>
+          </select>
+        </div>
+
+        <button onclick="openGuestModal()"
+          class="w-full lg:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Add Guest Family</span>
+        </button>
+      </div>
+
+      <!-- Guest Grid List -->
+      <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-left">
+            <thead>
+              <tr
+                class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-mono uppercase tracking-wider">
+                <th class="py-4 px-6">Family Head Name</th>
+                <th class="py-4 px-6">Side</th>
+                <th class="py-4 px-6 text-center">Accompanying Size</th>
+                <th class="py-4 px-6 text-center">RSVP Status</th>
+                <th class="py-4 px-6">Contact / Location</th>
+                <th class="py-4 px-6 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="guest-table-body" class="divide-y divide-slate-100 text-sm">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================== -->
+    <!-- TAB 5: EVENT TIMELINE & TASKS                  -->
+    <!-- ============================================== -->
+    <section id="tab-view-sprints" class="space-y-6 hidden">
+
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">Sakharpuda Timeline Tasks</h3>
+          <p class="text-xs text-slate-500 mt-1">Time-blocked sequence of preparations</p>
+        </div>
+
+        <button onclick="openTaskModal()"
+          class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs transition shadow-sm">
+          <i data-lucide="plus" class="w-4.5 h-4.5 text-indigo-600"></i>
+          <span>Add Task</span>
+        </button>
+      </div>
+
+      <!-- Timeline Column Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- COLUMN 1 -->
+        <div class="bg-slate-100/60 border border-slate-200 rounded-3xl p-5 flex flex-col min-h-[450px]">
+          <div class="flex items-center justify-between pb-3 border-b border-indigo-100 mb-4">
+            <div>
+              <h4 class="text-sm font-bold text-indigo-600">Phase 1: Pre-Travel</h4>
+              <p class="text-[10px] text-slate-500 font-mono mt-0.5">Now - June 6</p>
+            </div>
+            <span id="col-count-block_1"
+              class="px-2 py-0.5 text-xs font-bold font-mono bg-indigo-100 text-indigo-700 rounded-full">0</span>
+          </div>
+
+          <div id="kanban-col-block_1" class="space-y-3 flex-1 overflow-y-auto">
+            <!-- Tasks rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- COLUMN 2 -->
+        <div class="bg-slate-100/60 border border-slate-200 rounded-3xl p-5 flex flex-col min-h-[450px]">
+          <div class="flex items-center justify-between pb-3 border-b border-amber-100 mb-4">
+            <div>
+              <h4 class="text-sm font-bold text-amber-700">Phase 2: Sourcing & Prep</h4>
+              <p class="text-[10px] text-slate-500 font-mono mt-0.5">June 7 - June 17</p>
+            </div>
+            <span id="col-count-block_2"
+              class="px-2 py-0.5 text-xs font-bold font-mono bg-amber-100 text-amber-700 rounded-full">0</span>
+          </div>
+
+          <div id="kanban-col-block_2" class="space-y-3 flex-1 overflow-y-auto">
+            <!-- Tasks rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- COLUMN 3 -->
+        <div class="bg-slate-100/60 border border-slate-200 rounded-3xl p-5 flex flex-col min-h-[450px]">
+          <div class="flex items-center justify-between pb-3 border-b border-emerald-100 mb-4">
+            <div>
+              <h4 class="text-sm font-bold text-emerald-700">Phase 3: Event Week</h4>
+              <p class="text-[10px] text-slate-500 font-mono mt-0.5">June 18 - June 23</p>
+            </div>
+            <span id="col-count-block_3"
+              class="px-2 py-0.5 text-xs font-bold font-mono bg-emerald-100 text-emerald-700 rounded-full">0</span>
+          </div>
+
+          <div id="kanban-col-block_3" class="space-y-3 flex-1 overflow-y-auto">
+            <!-- Tasks rendered dynamically -->
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================== -->
+    <!-- TAB 6: EXPENSE TRACKER                         -->
+    <!-- ============================================== -->
+    <section id="tab-view-expenses" class="space-y-6 hidden">
+
+      <!-- Budget Edit Area & Stat Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+
+        <!-- Budget Card (Editable) -->
+        <div
+          class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[120px]">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Total Budget</span>
+              <button onclick="toggleEditBudget()" id="btn-edit-budget"
+                class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold flex items-center gap-1">
+                <i data-lucide="edit-2" class="w-3 h-3"></i><span>Edit</span>
+              </button>
+            </div>
+            <div id="budget-view" class="flex items-baseline gap-1 mt-2">
+              <h4 id="expense-stat-budget" class="text-2xl font-bold text-slate-900">₹5,00,000</h4>
+            </div>
+            <div id="budget-edit-input-container" class="hidden mt-2">
+              <div class="flex gap-2">
+                <input type="number" id="input-expense-budget"
+                  class="w-full px-2.5 py-1 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-300 font-mono"
+                  value="500000">
+                <button onclick="saveBudget()"
+                  class="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold">Save</button>
+              </div>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-2 font-mono">Wedding & engagement target</p>
+        </div>
+
+        <!-- Total Spent Card -->
+        <div
+          class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[120px]">
+          <div>
+            <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Total Expenses</span>
+            <h4 id="expense-stat-spent" class="text-2xl font-bold text-indigo-650 mt-2">₹0.00</h4>
+          </div>
+          <p id="spent-percentage" class="text-[10px] text-slate-500 mt-2 font-mono">0% of budget used</p>
+        </div>
+
+        <!-- Remaining Budget Card -->
+        <div
+          class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[120px]">
+          <div>
+            <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Remaining
+              Balance</span>
+            <h4 id="expense-stat-remaining" class="text-2xl font-bold text-slate-900 mt-2">₹0.00</h4>
+          </div>
+          <p id="remaining-status" class="text-[10px] text-emerald-600 mt-2 font-mono">Under Budget</p>
+        </div>
+
+        <!-- Paid Expenses Card -->
+        <div
+          class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[120px]">
+          <div>
+            <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Paid Amount</span>
+            <h4 id="expense-stat-paid" class="text-2xl font-bold text-emerald-600 mt-2">₹0.00</h4>
+          </div>
+          <p id="paid-count" class="text-[10px] text-slate-500 mt-2 font-mono">0 transactions settled</p>
+        </div>
+
+        <!-- Pending Expenses Card -->
+        <div
+          class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[120px]">
+          <div>
+            <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Pending Amount</span>
+            <h4 id="expense-stat-pending" class="text-2xl font-bold text-amber-600 mt-2">₹0.00</h4>
+          </div>
+          <p id="pending-count" class="text-[10px] text-slate-500 mt-2 font-mono">0 transactions remaining</p>
+        </div>
+
+      </div>
+
+      <!-- Filter & Action Header -->
+      <div
+        class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <!-- Search -->
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="expense-search" placeholder="Search description / vendor..."
+              class="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-300 transition">
+          </div>
+          <!-- Category Filter -->
+          <select id="expense-filter-category"
+            class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+            <option value="All">All Categories</option>
+            <option value="Venue">Venue</option>
+            <option value="Catering">Catering</option>
+            <option value="Decor">Decor</option>
+            <option value="Apparel">Apparel</option>
+            <option value="Sourcing">Sourcing</option>
+            <option value="Cake">Cake</option>
+            <option value="Photography">Photography</option>
+            <option value="Miscellaneous">Miscellaneous</option>
+          </select>
+          <!-- Status Filter -->
+          <select id="expense-filter-status"
+            class="w-full sm:w-40 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+            <option value="All">All Statuses</option>
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+
+        <button onclick="openExpenseModal()"
+          class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Record Expense</span>
+        </button>
+      </div>
+
+      <!-- Expense Table -->
+      <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-left">
+            <thead>
+              <tr
+                class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-mono uppercase tracking-wider">
+                <th class="py-4 px-6">Expense / Transaction</th>
+                <th class="py-4 px-6">Category</th>
+                <th class="py-4 px-6 text-center">Status</th>
+                <th class="py-4 px-6">Amount (INR)</th>
+                <th class="py-4 px-6">Vendor</th>
+                <th class="py-4 px-6">Remarks / Notes</th>
+                <th class="py-4 px-6 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="expense-table-body" class="divide-y divide-slate-100 text-sm">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- MODAL: CONFIRM DESTRUCTIVE ACTION (CUSTOM)     -->
+  <!-- ============================================== -->
+  <div id="confirm-modal"
+    class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div
+      class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-xl transform scale-95 transition-all duration-300">
+      <div class="flex items-center gap-4 text-rose-600 mb-4">
+        <div class="p-3 bg-rose-50 rounded-full">
+          <i data-lucide="trash-2" class="w-6 h-6 text-rose-600"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900" id="confirm-title">Delete Entry?</h3>
+      </div>
+      <p class="text-slate-600 mb-6 text-sm leading-relaxed" id="confirm-message">Are you sure you want to delete this
+        record? This action cannot be undone and will update all shared workspaces instantly.</p>
+      <div class="flex justify-end gap-3">
+        <button id="confirm-cancel-btn"
+          class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold transition text-xs">Cancel</button>
+        <button id="confirm-ok-btn"
+          class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold transition text-xs shadow-sm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD/EDIT PHOTOGRAPHER                   -->
+  <!-- ============================================== -->
+  <div id="modal-photographer"
+    class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div
+      class="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full p-6 shadow-xl transform scale-95 transition-all duration-300 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-6">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="camera" class="w-5 h-5 text-indigo-600"></i>
+          <span id="modal-photo-title">Add Photographer</span>
+        </h3>
+        <button onclick="closePhotographerModal()" class="text-slate-400 hover:text-slate-650">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-photographer" onsubmit="savePhotographer(event)" class="space-y-5">
+        <input type="hidden" id="photo-id">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Studio Name *</label>
+            <input type="text" id="photo-studio" required
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Lead Photographer
+              *</label>
+            <input type="text" id="photo-lead" required
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Availability
+              Status</label>
+            <select id="photo-status"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              <option value="Available">Available</option>
+              <option value="Tentative">Tentative</option>
+              <option value="Booked">Booked</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Base Location</label>
+            <input type="text" id="photo-location" placeholder="e.g. Pune"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Instagram Link</label>
+            <input type="text" id="photo-instagram" placeholder="@studio"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Total Quote (INR)
+              *</label>
+            <input type="number" id="photo-pricing" required
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Advance % Paid</label>
+            <input type="number" id="photo-advance" min="0" max="100"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Rating (1-10) *</label>
+            <input type="number" id="photo-rating" min="1" max="10" step="0.5" required
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Team Size</label>
+            <input type="number" id="photo-team" min="1"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono font-medium">Physical
+              Album Included?</label>
+            <select id="photo-album"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Camera & Gear
+              Details</label>
+            <input type="text" id="photo-equipment" placeholder="e.g. Sony A7IV, Drone, Prime lenses"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Key
+              Deliverables</label>
+            <input type="text" id="photo-deliverables" placeholder="e.g. 500 edited images, raw videos"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Remarks / Custom
+              Notes</label>
+            <input type="text" id="photo-remarks" placeholder="Special requirements, discounts..."
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-slate-200 pt-4 mt-6">
+          <button type="button" onclick="closePhotographerModal()"
+            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold text-xs transition shadow-sm">Cancel</button>
+          <button type="submit"
+            class="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs transition shadow-sm">Save
+            Candidate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD/EDIT SHOPPING ITEM                  -->
+  <!-- ============================================== -->
+  <div id="modal-shopping"
+    class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div
+      class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-xl transform scale-95 transition-all duration-300">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-6">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="shopping-bag" class="w-5 h-5 text-indigo-600"></i>
+          <span id="modal-shop-title">Add Registry Item</span>
+        </h3>
+        <button onclick="closeShoppingModal()" class="text-slate-400 hover:text-slate-650">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-shopping" onsubmit="saveShoppingItem(event)" class="space-y-4">
+        <input type="hidden" id="shop-id">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Item Name *</label>
+          <input type="text" id="shop-name" required placeholder="e.g. Gandhi Topis"
+            class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Quantity / Units
+              *</label>
+            <input type="text" id="shop-qty" required placeholder="e.g. 250 units"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Status</label>
+            <select id="shop-status"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              <option value="Not Started">Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Sourced">Sourced</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Budget (INR) *</label>
+          <input type="number" id="shop-budget" required placeholder="e.g. 12500"
+            class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Coordinator Notes</label>
+          <textarea id="shop-notes" placeholder="e.g. Purchase from Laxmi Road market..." rows="3"
+            class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition resize-none"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-slate-200 pt-4 mt-6">
+          <button type="button" onclick="closeShoppingModal()"
+            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold text-xs transition shadow-sm">Cancel</button>
+          <button type="submit"
+            class="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs transition shadow-sm">Save
+            Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD/EDIT GUEST                          -->
+  <!-- ============================================== -->
+  <div id="modal-guest"
+    class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div
+      class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-xl transform scale-95 transition-all duration-300">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-6">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="users" class="w-5 h-5 text-indigo-600"></i>
+          <span id="modal-guest-title">Add Guest Family</span>
+        </h3>
+        <button onclick="closeGuestModal()" class="text-slate-400 hover:text-slate-650">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-guest" onsubmit="saveGuest(event)" class="space-y-4">
+        <input type="hidden" id="guest-id">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Family Head Name
+            *</label>
+          <input type="text" id="guest-name" required placeholder="e.g. Sharadchandra Deshmukh"
+            class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Relation Side</label>
+            <select id="guest-side"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              <option value="Bride Side">Bride Side</option>
+              <option value="Groom Side">Groom Side</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Accompanying Count
+              *</label>
+            <input type="number" id="guest-count" required min="0" placeholder="Number of family members accompanying"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">RSVP Status</label>
+            <select id="guest-rsvp"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              <option value="Invited">Invited</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Declined">Declined</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Base Location
+              (City)</label>
+            <input type="text" id="guest-location" placeholder="e.g. Pune"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Contact Phone
+            Number</label>
+          <input type="tel" id="guest-phone" placeholder="e.g. 9876543210"
+            class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-slate-200 pt-4 mt-6">
+          <button type="button" onclick="closeGuestModal()"
+            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold text-xs transition shadow-sm">Cancel</button>
+          <button type="submit"
+            class="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs transition shadow-sm">Save
+            Guest</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD/EDIT TIMELINE TASK                  -->
+  <!-- ============================================== -->
+  <div id="modal-task"
+    class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div
+      class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-xl transform scale-95 transition-all duration-300">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-6">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="milestone" class="w-5 h-5 text-indigo-600"></i>
+          <span id="modal-task-title">Add Timeline Task</span>
+        </h3>
+        <button onclick="closeTaskModal()" class="text-slate-400 hover:text-slate-650">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-task" onsubmit="saveTask(event)" class="space-y-4">
+        <input type="hidden" id="task-id">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Task Description
+            *</label>
+          <input type="text" id="task-title" required placeholder="e.g. Lock Sourcing vendors"
+            class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Timeline Phase</label>
+          <select id="task-column"
+            class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+            <option value="block_1">Phase 1: Pre-Travel (Now - June 6)</option>
+            <option value="block_2">Phase 2: Sourcing & Prep (June 7 - 17)</option>
+            <option value="block_3">Phase 3: Event Week (June 18 - 23)</option>
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-slate-200 pt-4 mt-6">
+          <button type="button" onclick="closeTaskModal()"
+            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold text-xs transition shadow-sm">Cancel</button>
+          <button type="submit"
+            class="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs transition shadow-sm">Save
+            Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Always-visible Floating Action Button (FAB) for Recording Transaction -->
+  <button onclick="openExpenseModal()" id="btn-fab-record"
+    class="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold text-sm shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 active:scale-95 group">
+    <i data-lucide="plus-circle" class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"></i>
+    <span>Record Expense</span>
+  </button>
+
+  <!-- ============================================== -->
+  <!-- MODAL: RECORD EXPENSE                          -->
+  <!-- ============================================== -->
+  <div id="modal-expense"
+    class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div
+      class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-xl transform scale-95 transition-all duration-300">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-6">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="indian-rupee" class="w-5 h-5 text-indigo-600"></i>
+          <span id="modal-expense-title">Record Expense</span>
+        </h3>
+        <button onclick="closeExpenseModal()" class="text-slate-400 hover:text-slate-650">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="form-expense" onsubmit="saveExpense(event)" class="space-y-4">
+        <input type="hidden" id="expense-id">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Description *</label>
+          <input type="text" id="expense-title" required placeholder="e.g. Catering Deposit"
+            class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono font-medium">Category
+              *</label>
+            <select id="expense-category" required
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              <option value="Venue">Venue</option>
+              <option value="Catering">Catering</option>
+              <option value="Decor">Decor</option>
+              <option value="Apparel">Apparel</option>
+              <option value="Sourcing">Sourcing</option>
+              <option value="Cake">Cake</option>
+              <option value="Photography">Photography</option>
+              <option value="Miscellaneous">Miscellaneous</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono font-medium">Payment
+              Status</label>
+            <select id="expense-status" required
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              <option value="Paid">Paid</option>
+              <option value="Pending">Pending</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Amount (INR) *</label>
+            <input type="number" id="expense-amount" required placeholder="e.g. 15000"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Vendor Name</label>
+            <input type="text" id="expense-vendor" placeholder="e.g. Baker's Pride"
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Remarks / Custom
+            Notes</label>
+          <textarea id="expense-remarks" placeholder="Add receipt references, pending dates..." rows="3"
+            class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition resize-none"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-slate-200 pt-4 mt-6">
+          <button type="button" onclick="closeExpenseModal()"
+            class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold text-xs transition shadow-sm">Cancel</button>
+          <button type="submit"
+            class="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs transition shadow-sm">Record
+            Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"
+    class="fixed bottom-24 right-6 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+    <!-- Toasts injected dynamically -->
+  </div>
+
+  <!-- Main Controller Module Script -->
+  <script type="module">
+    // Firebase CDN imports (v10.8.0)
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getAuth, signInWithCustomToken, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { getFirestore, doc, collection, getDocs, setDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+    // ==========================================
+    // INITIAL DATASETS FOR DB SEEDING
+    // ==========================================
+    const getInitialPhotographersData = () => [
+        {
+          "id": "photo_01",
+          "studio": "Rohit Dalavi Photography",
+          "leadName": "Rohit Dalavi",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@rohitdalavi_photography0143__",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_02",
+          "studio": "Pratik Satav Photography",
+          "leadName": "Pratik Satav",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@pratik_satav_photography",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_03",
+          "studio": "Clicks by Rushi",
+          "leadName": "Rushi",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@clicksbyrushi",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_04",
+          "studio": "Clickography",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@clickography",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_05",
+          "studio": "The Photo Vibe",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@thephotovibe.in",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_06",
+          "studio": "Shutterflare",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@shutterflare.in",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_07",
+          "studio": "Atharv Raut Photography",
+          "leadName": "Atharv Raut",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@atharv_raut_photography",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_08",
+          "studio": "Vows at 11.11",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@vowsat11.11",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_09",
+          "studio": "The Story Artist",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@the_storyartist.in",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_10",
+          "studio": "The Untold Stories",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@theuntoldstories.in",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_11",
+          "studio": "The Memory Light",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@thememorylight.in",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_12",
+          "studio": "Viren Shirgaokar Photography",
+          "leadName": "Viren Shirgaokar",
+          "status": "Inquiry",
+          "location": "Kolhapur",
+          "instagram": "@virenshirgaokar",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_13",
+          "studio": "Abhi Dhaske Films",
+          "leadName": "Abhi Dhaske",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@abhi.dhaskefilms",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_14",
+          "studio": "Kiran Jagdane Photography",
+          "leadName": "Kiran Jagdane",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@kiran__jagdane",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_15",
+          "studio": "Sourabh Gokave Photofilms",
+          "leadName": "Sourabh Gokave",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@_sourabh_gokave_photofilms_",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_16",
+          "studio": "Snaps of Wedding",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@snaps_of_wedding",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_17",
+          "studio": "Pixo Studio",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@pixostudio.in",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_18",
+          "studio": "Unicorn Pixel Photography",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@unicornpixelphotography",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_19",
+          "studio": "Seven Vow Stories",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@sevenvowstories",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_20",
+          "studio": "Rishikesh Bhambure Photography",
+          "leadName": "Rishikesh Bhambure",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@rishikeshbhambure",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_21",
+          "studio": "Ruturaj Katkar Films",
+          "leadName": "Ruturaj Katkar",
+          "status": "Inquiry",
+          "location": "Kolhapur",
+          "instagram": "@ruturajkatkarfilms",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_22",
+          "studio": "Belif Photo Film",
+          "leadName": "",
+          "status": "Inquiry",
+          "location": "Pune",
+          "instagram": "@belif_photo_film",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        },
+        {
+          "id": "photo_23",
+          "studio": "Sanket Patil Photography",
+          "leadName": "Sanket Patil",
+          "status": "Inquiry",
+          "location": "Kolhapur",
+          "instagram": "@sanketttpatil",
+          "totalPricing": 0,
+          "advancePaid": 0,
+          "rating": 0,
+          "teamSize": 0,
+          "albumIncluded": "TBD",
+          "equipment": "Standard Kit",
+          "deliverables": "TBD",
+          "remarks": ""
+        }
+    ];
+
+    const getInitialShoppingData = () => [
+      { id: 'shop_1', name: '250 Gandhi Topis', quantity: '250 units', budget: 12500, status: 'Not Started', notes: 'Traditional cotton topis for grooms welcoming.' },
+      { id: 'shop_2', name: '250 Towels', quantity: '250 units', budget: 25000, status: 'Not Started', notes: 'Medium size cotton towels for gifting.' },
+      { id: 'shop_3', name: '250 Fresh Coconuts', quantity: '250 units', budget: 7500, status: 'Not Started', notes: 'Procure locally in Pune 1 day before ceremony.' },
+      { id: 'shop_4', name: '250 Gift Wrapping Bags', quantity: '250 units', budget: 5000, status: 'Not Started', notes: 'Copper-gold print paper bags.' },
+      { id: 'shop_5', name: 'Bridal Engagement Saree & Lehenga', quantity: '2 outfits', budget: 45000, status: 'Not Started', notes: 'Shopping at Laxmi Road (Paithani styles).' },
+      { id: 'shop_6', name: 'Groom Gift Outfit Set', quantity: '1 set', budget: 15000, status: 'Not Started', notes: 'Silk kurta dhoti set and matching shela.' },
+      { id: 'shop_7', name: 'Engagement Cake (for Cake Cutting)', quantity: '1 cake (3 kg)', budget: 6000, status: 'Not Started', notes: 'Design with traditional motifs, chocolate/butterscotch flavor.' }
+    ];
+
+    const getInitialGuestsData = () => [
+      { id: 'guest_1', name: 'Sharadchandra Deshmukh', side: 'Groom Side', accompanyingCount: 4, rsvpStatus: 'Confirmed', phone: '9876543210', location: 'Nagpur' },
+      { id: 'guest_2', name: 'Meera Kulkarni', side: 'Bride Side', accompanyingCount: 2, rsvpStatus: 'Confirmed', phone: '9822012345', location: 'Pune' },
+      { id: 'guest_3', name: 'Abhay Shinde', side: 'Bride Side', accompanyingCount: 3, rsvpStatus: 'Invited', phone: '9112233445', location: 'Mumbai' },
+      { id: 'guest_4', name: 'Rajesh Patil', side: 'Groom Side', accompanyingCount: 1, rsvpStatus: 'Declined', phone: '9090909090', location: 'Sangli' }
+    ];
+
+    const getInitialTasksData = () => [
+      { id: 'task_1', title: 'Lock Photographer candidate', column: 'block_1', status: 'Pending' },
+      { id: 'task_2', title: 'Finalize guest invitation card design', column: 'block_1', status: 'Pending' },
+      { id: 'task_3', title: 'Bulk fabric shopping for family outfits', column: 'block_1', status: 'Pending' },
+      { id: 'task_4', title: 'Lock Sourcing items (Topis, Towels, Bags)', column: 'block_1', status: 'Pending' },
+
+      { id: 'task_5', title: 'Rukhwat preparation (traditional decorative exhibits)', column: 'block_2', status: 'Pending' },
+      { id: 'task_6', title: 'Handmade coconut wrapping & cones', column: 'block_2', status: 'Pending' },
+      { id: 'task_7', title: 'Delegate gift distribution list to cousins', column: 'block_2', status: 'Pending' },
+
+      { id: 'task_8', title: 'Pick up fresh coconuts (250 count)', column: 'block_3', status: 'Pending' },
+      { id: 'task_9', title: 'Welcome Rangoli design prep', column: 'block_3', status: 'Pending' },
+      { id: 'task_10', title: 'Mehendi artist setup & welcome drinks', column: 'block_3', status: 'Pending' },
+      { id: 'task_11', title: 'Final venue walk-through', column: 'block_3', status: 'Pending' },
+      { id: 'task_12', title: 'Order & pick up engagement cake for cake cutting ceremony', column: 'block_3', status: 'Pending' }
+    ];
+
+    const getInitialExpensesData = () => [
+      { id: 'exp_1', title: 'Venue Booking Advance', category: 'Venue', amount: 50000, status: 'Paid', vendor: 'Grand Palace Lawns', remarks: 'Engagement hall deposit.' },
+      { id: 'exp_2', title: 'Paithani Saree Purchase', category: 'Apparel', amount: 30000, status: 'Paid', vendor: 'Tathastu Paithani', remarks: 'Bridal attire.' },
+      { id: 'exp_3', title: 'Photographer Advance', category: 'Photography', amount: 17000, status: 'Paid', vendor: 'Royal Marathi Frames', remarks: '20% booking deposit.' },
+      { id: 'exp_4', title: 'Catering Deposit', category: 'Catering', amount: 40000, status: 'Pending', vendor: 'Durvankur Caterers', remarks: 'To be settled on event week.' },
+      { id: 'exp_5', title: 'Engagement Cake', category: 'Cake', amount: 6000, status: 'Pending', vendor: 'Baker\'s Pride', remarks: '3kg chocolate custom cake.' }
+    ];
+
+    // ==========================================
+    // STATE MANAGEMENT & CONFIGS
+    // ==========================================
+    window.state = {
+      activeTab: 'dashboard',
+      weights: [33.3, 33.3, 33.4], // [Equipment, Pricing, Rating]
+      photographers: [],
+      shopping: [],
+      guests: [],
+      tasks: [],
+      expenses: [],
+      expenseBudget: 500000,
+      filters: {
+        photoSearch: '',
+        photoStatus: 'All',
+        shopSearch: '',
+        shopStatus: 'All',
+        guestSearch: '',
+        guestSide: 'All',
+        guestRsvp: 'All',
+        expenseSearch: '',
+        expenseCategory: 'All',
+        expenseStatus: 'All'
+      }
+    };
+
+    window.dbHelper = null;
+
+    // Helper functions for Toast
+    window.showToast = function (message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium shadow-lg transform translate-y-2 opacity-0 transition-all duration-300 pointer-events-auto ${type === 'success'
+        ? 'bg-white border-emerald-200 text-emerald-700 font-semibold'
+        : type === 'warning'
+          ? 'bg-white border-amber-200 text-amber-700 font-semibold'
+          : 'bg-white border-rose-200 text-rose-700 font-semibold'
+        }`;
+
+      let icon = '<i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>';
+      if (type === 'warning') {
+        icon = '<i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500"></i>';
+      } else if (type === 'error') {
+        icon = '<i data-lucide="alert-circle" class="w-5 h-5 text-rose-500"></i>';
+      }
+
+      toast.innerHTML = `${icon}<span>${message}</span>`;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-[-10px]');
+        setTimeout(() => { toast.remove(); }, 300);
+      }, 3200);
+    };
+
+    // Helper function to update status
+    function updateSyncStatus(status, label) {
+      const dot = document.getElementById('sync-dot');
+      const text = document.getElementById('sync-text');
+      const container = document.getElementById('sync-status');
+
+      if (status === 'connected') {
+        dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-emerald-500';
+        container.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/20 border border-emerald-500/20 text-xs font-mono text-emerald-400';
+      } else if (status === 'mock') {
+        dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-cyan-500';
+        container.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-950/20 border border-cyan-500/20 text-xs font-mono text-cyan-400';
+      } else if (status === 'error') {
+        dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-rose-500';
+        container.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-950/20 border border-rose-500/20 text-xs font-mono text-rose-400';
+      }
+      text.innerText = label;
+    }
+
+    // ==========================================
+    // COLLABORATIVE DATABASE WRAPPER
+    // ==========================================
+    class CollaborativeDB {
+      constructor() {
+        this.isMock = true;
+        this.db = null;
+        this.auth = null;
+        this.appId = 'lagna-manager-core';
+
+        // Grab values safely
+        if (typeof window.__app_id !== 'undefined' && window.__app_id) {
+          this.appId = window.__app_id;
+        }
+      }
+
+      async initialize() {
+        let config = null;
+        try {
+          if (typeof window.__firebase_config !== 'undefined' && window.__firebase_config) {
+            config = typeof window.__firebase_config === 'string'
+              ? JSON.parse(window.__firebase_config)
+              : window.__firebase_config;
+          }
+        } catch (e) {
+          console.warn("Firebase config parsing error, default to local storage mockup", e);
+        }
+
+        if (config && config.apiKey) {
+          try {
+            const app = initializeApp(config);
+            this.db = getFirestore(app);
+            this.auth = getAuth(app);
+            this.isMock = false;
+
+            // Auth Priority lifecycle
+            if (typeof window.__initial_auth_token !== 'undefined' && window.__initial_auth_token) {
+              await signInWithCustomToken(this.auth, window.__initial_auth_token);
+            } else {
+              await signInAnonymously(this.auth);
+            }
+
+            if (!this.auth.currentUser) {
+              throw new Error("Authentication failed to establish.");
+            }
+
+            updateSyncStatus('connected', `Synced (Live Cloud)`);
+            this.setupFirestoreListeners();
+          } catch (e) {
+            console.error("Firebase startup failed, falling back to Local Storage replication:", e);
+            this.setupMockStorage();
+          }
+        } else {
+          console.log("No firebase configuration injected. Using Local Storage mock layer.");
+          this.setupMockStorage();
+        }
+      }
+
+      setupMockStorage() {
+        this.isMock = true;
+        updateSyncStatus('mock', 'Mock Mode (Local Tab Sync)');
+
+        // Seeding collections if missing
+        ['photographers', 'shopping', 'guests', 'tasks', 'expenses'].forEach(col => {
+          const key = `lagnamanager_${this.appId}_${col}`;
+          if (!localStorage.getItem(key)) {
+            let defData = [];
+            if (col === 'photographers') defData = getInitialPhotographersData();
+            if (col === 'shopping') defData = getInitialShoppingData();
+            if (col === 'guests') defData = getInitialGuestsData();
+            if (col === 'tasks') defData = getInitialTasksData();
+            if (col === 'expenses') defData = getInitialExpensesData();
+            localStorage.setItem(key, JSON.stringify(defData));
+          }
+        });
+
+        const budgetKey = `lagnamanager_${this.appId}_expenseBudget`;
+        if (!localStorage.getItem(budgetKey)) {
+          localStorage.setItem(budgetKey, '500000');
+        }
+
+        // Trigger updates across browser tabs using storage event
+        window.addEventListener('storage', (e) => {
+          if (e.key && e.key.startsWith(`lagnamanager_${this.appId}_`)) {
+            this.pullMockData();
+          }
+        });
+
+        this.pullMockData();
+      }
+
+      pullMockData() {
+        const loadAndSanitize = (colName) => {
+          try {
+            const raw = localStorage.getItem(`lagnamanager_${this.appId}_${colName}`);
+            if (!raw) return [];
+            let data = JSON.parse(raw);
+            if (Array.isArray(data)) {
+              let changed = false;
+              if (data.some(item => Array.isArray(item))) {
+                data = data.flat(Infinity);
+                changed = true;
+              }
+              const originalLength = data.length;
+              data = data.filter(item => item && typeof item === 'object' && !Array.isArray(item));
+              if (data.length !== originalLength) {
+                changed = true;
+              }
+              if (changed) {
+                localStorage.setItem(`lagnamanager_${this.appId}_${colName}`, JSON.stringify(data));
+              }
+              return data;
+            }
+          } catch (e) {
+            console.error(`Error loading/sanitizing ${colName} from localStorage:`, e);
+          }
+          return [];
+        };
+
+        state.photographers = loadAndSanitize('photographers');
+        state.shopping = loadAndSanitize('shopping');
+        state.guests = loadAndSanitize('guests');
+        state.tasks = loadAndSanitize('tasks');
+        state.expenses = loadAndSanitize('expenses');
+        state.expenseBudget = parseFloat(localStorage.getItem(`lagnamanager_${this.appId}_expenseBudget`) || '500000');
+
+        triggerAllRenders();
+      }
+
+      setupFirestoreListeners() {
+        const listen = (colName, stateKey) => {
+          const colRef = collection(this.db, 'artifacts', this.appId, 'public', 'data', colName);
+          onSnapshot(colRef, async (snapshot) => {
+            if (snapshot.empty) {
+              // Seeding Rule
+              await this.seedCollection(colName);
+              return;
+            }
+
+            let list = [];
+            snapshot.forEach(doc => {
+              list.push({ id: doc.id, ...doc.data() });
+            });
+            state[stateKey] = list;
+            triggerAllRenders();
+          }, (err) => {
+            console.error(`Firestore Snapshot Error for ${colName}:`, err);
+            updateSyncStatus('error', 'Cloud sync failure');
+          });
+        };
+
+        listen('photographers', 'photographers');
+        listen('shopping', 'shopping');
+        listen('guests', 'guests');
+        listen('tasks', 'tasks');
+        listen('expenses', 'expenses');
+
+        const budgetDocRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'config', 'budget');
+        onSnapshot(budgetDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            state.expenseBudget = parseFloat(docSnap.data().value) || 500000;
+          } else {
+            setDoc(budgetDocRef, { value: 500000 });
+            state.expenseBudget = 500000;
+          }
+          triggerAllRenders();
+        }, (err) => {
+          console.warn("Error loading budget doc from firestore, using local fallback", err);
+        });
+      }
+
+      async seedCollection(colName) {
+        if (!this.auth.currentUser) return;
+        let data = [];
+        if (colName === 'photographers') data = getInitialPhotographersData();
+        if (colName === 'shopping') data = getInitialShoppingData();
+        if (colName === 'guests') data = getInitialGuestsData();
+        if (colName === 'tasks') data = getInitialTasksData();
+        if (colName === 'expenses') data = getInitialExpensesData();
+
+        for (let item of data) {
+          const docRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', colName, item.id);
+          await setDoc(docRef, item);
+        }
+      }
+
+      async saveBudget(value) {
+        if (this.isMock) {
+          localStorage.setItem(`lagnamanager_${this.appId}_expenseBudget`, String(value));
+          this.pullMockData();
+          return;
+        }
+
+        if (!this.auth.currentUser) return;
+        const budgetDocRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'config', 'budget');
+        await setDoc(budgetDocRef, { value: parseFloat(value) || 500000 });
+      }
+
+      // CRUD Core Functions
+      async saveRecord(colName, id, record) {
+        if (this.isMock) {
+          const key = `lagnamanager_${this.appId}_${colName}`;
+          let items = JSON.parse(localStorage.getItem(key) || '[]');
+          if (id) {
+            items = items.map(item => item.id === id ? { ...item, ...record } : item);
+          } else {
+            const newId = `${colName.slice(0, 4)}_${Date.now()}`;
+            items.push({ id: newId, ...record });
+          }
+          localStorage.setItem(key, JSON.stringify(items));
+          this.pullMockData();
+          return;
+        }
+
+        // Firestore guard
+        if (!this.auth.currentUser) return;
+        const targetId = id || `${colName.slice(0, 4)}_${Date.now()}`;
+        const docRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', colName, targetId);
+        await setDoc(docRef, { id: targetId, ...record }, { merge: true });
+      }
+
+      async deleteRecord(colName, id) {
+        if (this.isMock) {
+          const key = `lagnamanager_${this.appId}_${colName}`;
+          let items = JSON.parse(localStorage.getItem(key) || '[]');
+          items = items.filter(item => item.id !== id);
+          localStorage.setItem(key, JSON.stringify(items));
+          this.pullMockData();
+          return;
+        }
+
+        if (!this.auth.currentUser) return;
+        const docRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', colName, id);
+        await deleteDoc(docRef);
+      }
+    }
+
+    // ==========================================
+    // SCORING ALGORITHM & BADGES
+    // ==========================================
+    function calculateEquipmentScore(equip, album, teamSize) {
+      if (!equip) return 3.0;
+      const keywords = ['sony', 'canon', 'nikon', 'lumix', 'fuji', 'red', 'arri', 'drone', 'gimbal', 'prime', 'lens', 'lights', '4k', 'stabilizer', 'tripod', 'flash', 'fx3', 'a7', 'r5', 'r6', 'mavic', 'dji'];
+      let count = 0;
+      const eqLower = equip.toLowerCase();
+      keywords.forEach(word => {
+        if (eqLower.includes(word)) count++;
+      });
+      let score = 2.0 + (count * 1.5);
+      if (album && String(album).toLowerCase() === 'yes') score += 2.0;
+      if (teamSize && parseInt(teamSize) > 2) score += 1.5;
+      return Math.min(10, Math.max(1, score));
+    }
+
+    function calculatePricingScore(price, allPhotos) {
+      if (allPhotos.length <= 1) return 10.0;
+      const prices = allPhotos.map(p => parseFloat(p.totalPricing) || 0);
+      const minPrice = Math.min(...prices);
+      const maxPrice = Math.max(...prices);
+      if (maxPrice === minPrice) return 10.0;
+      // Cheapest yields 10, expensive yields 2.
+      return 2.0 + 8.0 * ((maxPrice - price) / (maxPrice - minPrice));
+    }
+
+    function getRankedPhotographers() {
+      const photos = state.photographers;
+      const weights = state.weights;
+
+      const calculated = photos.map(p => {
+        const eqScore = calculateEquipmentScore(p.equipment, p.albumIncluded, p.teamSize);
+        const prScore = calculatePricingScore(p.totalPricing, photos);
+        const subScore = parseFloat(p.rating) || 5.0;
+
+        const finalScore = (eqScore * weights[0] + prScore * weights[1] + subScore * weights[2]) / 100;
+        return {
+          ...p,
+          eqScore: eqScore.toFixed(1),
+          prScore: prScore.toFixed(1),
+          finalScore: parseFloat(finalScore.toFixed(2))
+        };
+      });
+
+      // Find Rank 1 from available candidates
+      let bestAvailable = null;
+      calculated.forEach(p => {
+        if (p.status !== 'Booked') {
+          if (!bestAvailable || p.finalScore > bestAvailable.finalScore) {
+            bestAvailable = p;
+          }
+        }
+      });
+
+      return {
+        list: calculated,
+        rank1Id: bestAvailable ? bestAvailable.id : null,
+        rank1Obj: bestAvailable
+      };
+    }
+
+    // ==========================================
+    // RENDERING LOGIC
+    // ==========================================
+    function triggerAllRenders() {
+      const calculatedPhotos = getRankedPhotographers();
+
+      renderDashboard(calculatedPhotos);
+      renderPhotographerMatrix(calculatedPhotos);
+      renderShoppingRegistry();
+      renderGuestList();
+      renderTimelineBoard();
+      renderExpenses();
+
+      lucide.createIcons();
+    }
+
+    // Tab Switcher
+    window.switchTab = function (tabName) {
+      state.activeTab = tabName;
+      ['dashboard', 'photographer', 'shopping', 'guests', 'sprints', 'expenses'].forEach(tab => {
+        const btn = document.getElementById(`tab-btn-${tab}`);
+        const view = document.getElementById(`tab-view-${tab}`);
+        if (tab === tabName) {
+          btn.className = "tab-active flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 whitespace-nowrap";
+          view.classList.remove('hidden');
+        } else {
+          btn.className = "text-slate-500 hover:text-slate-800 hover:bg-slate-100 flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm transition-all duration-200 whitespace-nowrap";
+          view.classList.add('hidden');
+        }
+      });
+      triggerAllRenders();
+    };
+
+    // Countdown Timer Logic
+    const targetTime = new Date("2026-06-23T09:00:00").getTime();
+    function tickCountdown() {
+      const now = new Date().getTime();
+      const distance = targetTime - now;
+
+      const daysEl = document.getElementById("countdown-days");
+      const hoursEl = document.getElementById("countdown-hours");
+      const minutesEl = document.getElementById("countdown-minutes");
+      const secondsEl = document.getElementById("countdown-seconds");
+      const statusEl = document.getElementById("countdown-status");
+
+      if (distance < 0) {
+        if (daysEl) daysEl.innerText = "00";
+        if (hoursEl) hoursEl.innerText = "00";
+        if (minutesEl) minutesEl.innerText = "00";
+        if (secondsEl) secondsEl.innerText = "00";
+        if (statusEl) statusEl.innerText = "Sakharpuda Ceremony is Live!";
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      if (daysEl) daysEl.innerText = String(days).padStart(2, '0');
+      if (hoursEl) hoursEl.innerText = String(hours).padStart(2, '0');
+      if (minutesEl) minutesEl.innerText = String(minutes).padStart(2, '0');
+      if (secondsEl) secondsEl.innerText = String(seconds).padStart(2, '0');
+      if (statusEl) statusEl.innerText = "Awaiting Ceremony";
+    }
+    setInterval(tickCountdown, 1000);
+    tickCountdown();
+
+    // RENDER: DASHBOARD
+    function renderDashboard(photoObj) {
+      // 1. Top Photographer Indicator
+      const topPhotoEl = document.getElementById("dash-photographer-rank1");
+      if (photoObj.rank1Obj) {
+        topPhotoEl.innerHTML = `👑 Rank 1: ${photoObj.rank1Obj.studio} <span class="font-mono text-xs text-slate-400">(${photoObj.rank1Obj.finalScore}/10)</span>`;
+      } else {
+        topPhotoEl.innerText = "None available";
+      }
+
+      // 2. Sourcing Progress Meter
+      const totalSourcing = state.shopping.length;
+      const sourcedSourcing = state.shopping.filter(s => s.status === 'Sourced').length;
+      const sourcingPercentage = totalSourcing > 0 ? (sourcedSourcing / totalSourcing) * 100 : 0;
+
+      document.getElementById("sourcing-meter-text").innerText = `${sourcedSourcing}/${totalSourcing} Sourced (${Math.round(sourcingPercentage)}%)`;
+      document.getElementById("sourcing-meter-bar").style.width = `${sourcingPercentage}%`;
+
+      // 3. RSVP Progress Meter
+      const targetGuests = 500;
+      const confirmedGuests = state.guests
+        .filter(g => g.rsvpStatus === 'Confirmed')
+        .reduce((sum, g) => sum + (parseInt(g.accompanyingCount) || 0) + 1, 0);
+      const rsvpPercentage = Math.min(100, (confirmedGuests / targetGuests) * 100);
+
+      document.getElementById("rsvp-meter-text").innerText = `${confirmedGuests} / ${targetGuests} Guests (${Math.round(rsvpPercentage)}%)`;
+      document.getElementById("rsvp-meter-bar").style.width = `${rsvpPercentage}%`;
+
+      // 4. Timeline Task Progress Meter
+      const totalTasks = state.tasks.length;
+      const completedTasks = state.tasks.filter(t => t.status === 'Completed').length;
+      const sprintPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+      document.getElementById("sprint-meter-text").innerText = `${completedTasks}/${totalTasks} Tasks (${Math.round(sprintPercentage)}%)`;
+      document.getElementById("sprint-meter-bar").style.width = `${sprintPercentage}%`;
+    }
+
+    // RENDER: PHOTOGRAPHER MATRIX
+    function renderPhotographerMatrix(photoObj) {
+      const grid = document.getElementById("photographers-grid");
+      grid.innerHTML = '';
+
+      let list = photoObj.list;
+
+      // Filter & Search client-side
+      const query = state.filters.photoSearch.toLowerCase();
+      const statusFilter = state.filters.photoStatus;
+
+      list = list.filter(p => {
+        const matchesQuery = p.studio.toLowerCase().includes(query) || p.location.toLowerCase().includes(query);
+        const matchesStatus = statusFilter === 'All' || p.status === statusFilter;
+        return matchesQuery && matchesStatus;
+      });
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-500 border border-dashed border-slate-800 rounded-3xl">
+            <i data-lucide="camera-off" class="w-8 h-8 mx-auto mb-2 text-slate-600"></i>
+            <p class="text-sm">No photographers match the filters.</p>
+          </div>
+        `;
+        return;
+      }
+
+      list.forEach(p => {
+        const isRank1 = p.id === photoObj.rank1Id;
+        const statusColors = {
+          'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+          'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
+          'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
+        };
+
+        const card = document.createElement('div');
+        card.className = `relative bg-white border ${isRank1 ? 'border-indigo-500 pulse-glow' : 'border-slate-200'} rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between`;
+
+        card.innerHTML = `
+          <div>
+            <!-- Top badges -->
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${statusColors[p.status]}">${p.status}</span>
+              ${isRank1 ? `
+                <span class="flex items-center gap-1 bg-indigo-650 text-white font-bold text-[10px] uppercase font-mono px-2.5 py-1 rounded-full shadow-sm">
+                  <i data-lucide="crown" class="w-3 h-3"></i> Rank 1
+                </span>
+              ` : ''}
+            </div>
+
+            <!-- Header details -->
+            <h4 class="text-lg font-bold text-slate-900">${p.studio}</h4>
+            <p class="text-xs text-slate-500 font-mono mt-0.5">${p.leadName} • ${p.location}</p>
+            
+            ${p.instagram ? `
+              <a href="https://instagram.com/${p.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-indigo-600 hover:underline font-mono mt-1.5">
+                <i data-lucide="instagram" class="w-3 h-3"></i> ${p.instagram}
+              </a>
+            ` : ''}
+
+            <!-- Score Display -->
+            <div class="grid grid-cols-3 gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-3 my-4 font-mono text-center shadow-sm">
+              <div>
+                <span class="text-[9px] text-slate-500 uppercase">Gear</span>
+                <div class="text-sm font-bold text-slate-750 mt-0.5">${p.eqScore}</div>
+              </div>
+              <div>
+                <span class="text-[9px] text-slate-500 uppercase">Price</span>
+                <div class="text-sm font-bold text-slate-750 mt-0.5">${p.prScore}</div>
+              </div>
+              <div class="border-l border-slate-200">
+                <span class="text-[9px] text-indigo-600 uppercase font-bold">Score</span>
+                <div class="text-sm font-black text-indigo-700 mt-0.5">${p.finalScore}</div>
+              </div>
+            </div>
+
+            <!-- Pricing Details -->
+            <div class="space-y-1.5 text-xs text-slate-650 border-b border-slate-100 pb-3 mb-3">
+              <div class="flex justify-between">
+                <span class="text-slate-500">Total Price:</span>
+                <span class="font-semibold text-slate-800 font-mono">₹${parseFloat(p.totalPricing).toLocaleString('en-IN')}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Advance %:</span>
+                <span class="font-semibold text-slate-800 font-mono">${p.advancePaid || 0}%</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Team Size:</span>
+                <span class="font-semibold text-slate-800">${p.teamSize || 1} Persons</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Album Included:</span>
+                <span class="font-semibold text-slate-800">${p.albumIncluded || 'No'}</span>
+              </div>
+            </div>
+
+            <!-- Tech Details -->
+            <div class="space-y-2 text-xs mb-4">
+              <div>
+                <span class="text-[10px] font-mono text-slate-500 uppercase font-bold">Gear Specs:</span>
+                <p class="text-slate-700 leading-relaxed mt-0.5 truncate" title="${p.equipment || 'None'}">${p.equipment || 'None'}</p>
+              </div>
+              <div>
+                <span class="text-[10px] font-mono text-slate-500 uppercase font-bold">Deliverables:</span>
+                <p class="text-slate-700 leading-relaxed mt-0.5 truncate" title="${p.deliverables || 'None'}">${p.deliverables || 'None'}</p>
+              </div>
+              ${p.remarks ? `
+                <div>
+                  <span class="text-[10px] font-mono text-slate-500 uppercase font-bold">Notes:</span>
+                  <p class="text-slate-500 leading-relaxed mt-0.5 italic truncate" title="${p.remarks}">${p.remarks}</p>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2 border-t border-slate-100 pt-3">
+            <button onclick="editPhotographer('${p.id}')" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs transition shadow-sm">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Edit</span>
+            </button>
+            <button onclick="deletePhotographerDialog('${p.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 hover:text-rose-700 rounded-xl text-xs transition shadow-sm">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // RENDER: SHOPPING REGISTRY
+    function renderShoppingRegistry() {
+      const tbody = document.getElementById("shopping-table-body");
+      tbody.innerHTML = '';
+
+      let list = state.shopping;
+
+      // Filter & Search client-side
+      const query = state.filters.shopSearch.toLowerCase();
+      const statusFilter = state.filters.shopStatus;
+
+      list = list.filter(item => {
+        const matchesQuery = item.name.toLowerCase().includes(query) || (item.notes && item.notes.toLowerCase().includes(query));
+        const matchesStatus = statusFilter === 'All' || item.status === statusFilter;
+        return matchesQuery && matchesStatus;
+      });
+
+      // Update statistics
+      const totalBudget = state.shopping.reduce((sum, item) => sum + (parseFloat(item.budget) || 0), 0);
+      const sourcedCount = state.shopping.filter(item => item.status === 'Sourced').length;
+      const sourcedBudget = state.shopping
+        .filter(item => item.status === 'Sourced')
+        .reduce((sum, item) => sum + (parseFloat(item.budget) || 0), 0);
+      const remainingBudget = totalBudget - sourcedBudget;
+
+      document.getElementById("shop-stat-budget").innerText = `₹${totalBudget.toLocaleString('en-IN')}`;
+      document.getElementById("shop-stat-sourced").innerText = `${sourcedCount} / ${state.shopping.length} Sourced`;
+      document.getElementById("shop-stat-remaining").innerText = `₹${remainingBudget.toLocaleString('en-IN')}`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-12 text-center text-slate-500 font-medium">
+              <i data-lucide="shopping-cart" class="w-8 h-8 mx-auto mb-2 text-slate-600"></i>
+              <span>No sourcing registry items match the filter criteria.</span>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      list.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition border-b border-slate-100';
+
+        const statusBadges = {
+          'Not Started': 'bg-slate-100 text-slate-600 border-slate-200',
+          'In Progress': 'bg-amber-50 text-amber-600 border-amber-200',
+          'Sourced': 'bg-emerald-50 text-emerald-600 border-emerald-200'
+        };
+
+        tr.innerHTML = `
+          <td class="py-4 px-6 font-semibold text-slate-800">${item.name}</td>
+          <td class="py-4 px-6 text-center">
+            <select onchange="updateShoppingStatus('${item.id}', this.value)" class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadges[item.status]} bg-white focus:outline-none cursor-pointer">
+              <option value="Not Started" ${item.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
+              <option value="In Progress" ${item.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+              <option value="Sourced" ${item.status === 'Sourced' ? 'selected' : ''}>Sourced</option>
+            </select>
+          </td>
+          <td class="py-4 px-6 text-slate-600 font-mono">${item.quantity}</td>
+          <td class="py-4 px-6 text-slate-800 font-semibold font-mono">₹${parseFloat(item.budget).toLocaleString('en-IN')}</td>
+          <td class="py-4 px-6 text-slate-500 italic text-xs truncate max-w-[200px]" title="${item.notes || ''}">${item.notes || '—'}</td>
+          <td class="py-4 px-6 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              <button onclick="editShoppingItem('${item.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition shadow-sm">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteShoppingItemDialog('${item.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-lg transition shadow-sm">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // RENDER: GUEST LIST
+    function renderGuestList() {
+      const tbody = document.getElementById("guest-table-body");
+      tbody.innerHTML = '';
+
+      let list = state.guests;
+
+      // Filter & Search client-side
+      const query = state.filters.guestSearch.toLowerCase();
+      const sideFilter = state.filters.guestSide;
+      const rsvpFilter = state.filters.guestRsvp;
+
+      list = list.filter(g => {
+        const matchesQuery = g.name.toLowerCase().includes(query) || (g.location && g.location.toLowerCase().includes(query));
+        const matchesSide = sideFilter === 'All' || g.side === sideFilter;
+        const matchesRsvp = rsvpFilter === 'All' || g.rsvpStatus === rsvpFilter;
+        return matchesQuery && matchesSide && matchesRsvp;
+      });
+
+      // Calculate stats
+      const totalConfirmed = state.guests
+        .filter(g => g.rsvpStatus === 'Confirmed')
+        .reduce((sum, g) => sum + (parseInt(g.accompanyingCount) || 0) + 1, 0);
+
+      const brideConfirmed = state.guests
+        .filter(g => g.side === 'Bride Side' && g.rsvpStatus === 'Confirmed')
+        .reduce((sum, g) => sum + (parseInt(g.accompanyingCount) || 0) + 1, 0);
+
+      const groomConfirmed = state.guests
+        .filter(g => g.side === 'Groom Side' && g.rsvpStatus === 'Confirmed')
+        .reduce((sum, g) => sum + (parseInt(g.accompanyingCount) || 0) + 1, 0);
+
+      const declinedHeadcount = state.guests
+        .filter(g => g.rsvpStatus === 'Declined')
+        .reduce((sum, g) => sum + (parseInt(g.accompanyingCount) || 0) + 1, 0);
+
+      document.getElementById("guest-stat-confirmed").innerText = `${totalConfirmed} Guests`;
+      document.getElementById("guest-stat-bride").innerText = `${brideConfirmed} Guests`;
+      document.getElementById("guest-stat-groom").innerText = `${groomConfirmed} Guests`;
+      document.getElementById("guest-stat-declined").innerText = `${declinedHeadcount} Guests`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-12 text-center text-slate-500 font-medium">
+              <i data-lucide="users-2" class="w-8 h-8 mx-auto mb-2 text-slate-600"></i>
+              <span>No guest entries match the selected filters.</span>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      list.forEach(g => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition border-b border-slate-100';
+
+        const rsvpClasses = {
+          'Invited': 'bg-indigo-50 text-indigo-600 border-indigo-200',
+          'Confirmed': 'bg-emerald-50 text-emerald-600 border-emerald-200',
+          'Declined': 'bg-rose-50 text-rose-600 border-rose-200'
+        };
+
+        tr.innerHTML = `
+          <td class="py-4 px-6 font-semibold text-slate-800">
+            <div>
+              <span>${g.name}</span>
+            </div>
+          </td>
+          <td class="py-4 px-6">
+            <span class="px-2.5 py-0.5 text-xs rounded-full font-semibold border ${g.side === 'Bride Side' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-indigo-50 text-indigo-600 border-indigo-100'}">
+              ${g.side}
+            </span>
+          </td>
+          <td class="py-4 px-6 text-center font-mono font-bold text-slate-700">+ ${g.accompanyingCount} <span class="text-xs text-slate-400 font-normal">(Total: ${parseInt(g.accompanyingCount) + 1})</span></td>
+          <td class="py-4 px-6 text-center">
+            <select onchange="updateGuestRsvp('${g.id}', this.value)" class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${rsvpClasses[g.rsvpStatus]} bg-white focus:outline-none cursor-pointer">
+              <option value="Invited" ${g.rsvpStatus === 'Invited' ? 'selected' : ''}>Invited</option>
+              <option value="Confirmed" ${g.rsvpStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+              <option value="Declined" ${g.rsvpStatus === 'Declined' ? 'selected' : ''}>Declined</option>
+            </select>
+          </td>
+          <td class="py-4 px-6 text-slate-600">
+            <div class="flex flex-col">
+              <span class="font-mono text-xs font-semibold">${g.phone || 'No phone'}</span>
+              <span class="text-xs text-slate-400">${g.location || 'No location'}</span>
+            </div>
+          </td>
+          <td class="py-4 px-6 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              <button onclick="editGuest('${g.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition shadow-sm">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteGuestDialog('${g.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-lg transition shadow-sm">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // RENDER: AGILE KANBAN
+    function renderTimelineBoard() {
+      const col1 = document.getElementById("kanban-col-block_1");
+      const col2 = document.getElementById("kanban-col-block_2");
+      const col3 = document.getElementById("kanban-col-block_3");
+
+      col1.innerHTML = '';
+      col2.innerHTML = '';
+      col3.innerHTML = '';
+
+      let c1Count = 0, c2Count = 0, c3Count = 0;
+
+      state.tasks.forEach(task => {
+        const item = document.createElement('div');
+        item.className = `p-3.5 rounded-2xl border transition-all duration-200 flex items-start gap-3 shadow-sm bg-white ${task.status === 'Completed'
+          ? 'border-emerald-200 bg-emerald-50/30'
+          : 'border-slate-200'
+          }`;
+
+        item.innerHTML = `
+          <input type="checkbox" ${task.status === 'Completed' ? 'checked' : ''} 
+            onchange="toggleTaskStatus('${task.id}', this.checked)" 
+            class="w-4 h-4 rounded border-slate-300 bg-white text-indigo-650 focus:ring-0 cursor-pointer mt-1">
+          
+          <div class="flex-1">
+            <span class="text-sm font-semibold leading-snug break-words ${task.status === 'Completed'
+            ? 'line-through text-slate-400'
+            : 'text-slate-800'
+          }">${task.title}</span>
+            
+            <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-500 font-mono">
+              <span>Status: <span class="${task.status === 'Completed' ? 'text-emerald-650 font-semibold' : 'text-amber-600 font-semibold'}">${task.status || 'Pending'}</span></span>
+              
+              <div class="flex gap-1.5 opacity-80 hover:opacity-100 transition">
+                <button onclick="editTask('${task.id}')" class="hover:text-indigo-650 text-slate-500">Edit</button>
+                <span>•</span>
+                <button onclick="deleteTaskDialog('${task.id}')" class="hover:text-rose-600 text-slate-500">Delete</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        if (task.column === 'block_1') {
+          col1.appendChild(item);
+          c1Count++;
+        } else if (task.column === 'block_2') {
+          col2.appendChild(item);
+          c2Count++;
+        } else if (task.column === 'block_3') {
+          col3.appendChild(item);
+          c3Count++;
+        }
+      });
+
+      document.getElementById('col-count-block_1').innerText = c1Count;
+      document.getElementById('col-count-block_2').innerText = c2Count;
+      document.getElementById('col-count-block_3').innerText = c3Count;
+
+      // Render Empty States if columns are vacant
+      const makeEmpty = (col, msg) => {
+        col.innerHTML = `
+          <div class="py-8 text-center text-slate-500 border border-dashed border-slate-200 rounded-2xl">
+            <i data-lucide="inbox" class="w-6 h-6 mx-auto mb-1.5 text-slate-400"></i>
+            <p class="text-[11px]">${msg}</p>
+          </div>
+        `;
+      };
+      if (c1Count === 0) makeEmpty(col1, 'No tasks in Phase 1');
+      if (c2Count === 0) makeEmpty(col2, 'No tasks in Phase 2');
+      if (c3Count === 0) makeEmpty(col3, 'No tasks in Phase 3');
+    }
+
+    // ==========================================
+    // CONTROLLERS & ACTIONS
+    // ==========================================
+
+    // Dynamic Slider Weight Rebalancing
+    window.handleWeightSliderChange = function (changedIndex, newValue) {
+      let weights = [
+        parseFloat(document.getElementById('weight-equipment').value),
+        parseFloat(document.getElementById('weight-pricing').value),
+        parseFloat(document.getElementById('weight-rating').value)
+      ];
+      let oldVal = state.weights[changedIndex];
+      let delta = newValue - oldVal;
+      weights[changedIndex] = newValue;
+
+      let otherIndices = [0, 1, 2].filter(idx => idx !== changedIndex);
+      let sumOthers = weights[otherIndices[0]] + weights[otherIndices[1]];
+
+      if (sumOthers > 0) {
+        weights[otherIndices[0]] -= delta * (weights[otherIndices[0]] / sumOthers);
+        weights[otherIndices[1]] -= delta * (weights[otherIndices[1]] / sumOthers);
+      } else {
+        weights[otherIndices[0]] -= delta / 2;
+        weights[otherIndices[1]] -= delta / 2;
+      }
+
+      for (let i = 0; i < 3; i++) {
+        weights[i] = Math.max(0, Math.min(100, weights[i]));
+      }
+
+      let currentSum = weights[0] + weights[1] + weights[2];
+      let diff = 100 - currentSum;
+      let adjustIdx = otherIndices[0];
+      weights[adjustIdx] += diff;
+      weights[adjustIdx] = Math.max(0, Math.min(100, weights[adjustIdx]));
+
+      state.weights = weights;
+
+      // Update slider positions
+      document.getElementById('weight-equipment').value = weights[0].toFixed(1);
+      document.getElementById('weight-pricing').value = weights[1].toFixed(1);
+      document.getElementById('weight-rating').value = weights[2].toFixed(1);
+
+      document.getElementById('weight-equipment-val').innerText = Math.round(weights[0]) + '%';
+      document.getElementById('weight-pricing-val').innerText = Math.round(weights[1]) + '%';
+      document.getElementById('weight-rating-val').innerText = Math.round(weights[2]) + '%';
+
+      triggerAllRenders();
+    };
+
+    // Bind slider inputs
+    document.getElementById('weight-equipment').addEventListener('input', (e) => handleWeightSliderChange(0, parseFloat(e.target.value)));
+    document.getElementById('weight-pricing').addEventListener('input', (e) => handleWeightSliderChange(1, parseFloat(e.target.value)));
+    document.getElementById('weight-rating').addEventListener('input', (e) => handleWeightSliderChange(2, parseFloat(e.target.value)));
+
+    // SEARCH & FILTER TRIGGERS
+    document.getElementById('photo-search').addEventListener('input', (e) => {
+      state.filters.photoSearch = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('photo-filter-status').addEventListener('change', (e) => {
+      state.filters.photoStatus = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('shop-search').addEventListener('input', (e) => {
+      state.filters.shopSearch = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('shop-filter-status').addEventListener('change', (e) => {
+      state.filters.shopStatus = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('guest-search').addEventListener('input', (e) => {
+      state.filters.guestSearch = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('guest-filter-side').addEventListener('change', (e) => {
+      state.filters.guestSide = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('guest-filter-rsvp').addEventListener('change', (e) => {
+      state.filters.guestRsvp = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('expense-search').addEventListener('input', (e) => {
+      state.filters.expenseSearch = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('expense-filter-category').addEventListener('change', (e) => {
+      state.filters.expenseCategory = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('expense-filter-status').addEventListener('change', (e) => {
+      state.filters.expenseStatus = e.target.value;
+      triggerAllRenders();
+    });
+
+    // Custom Destructive Confirm dialogues
+    let activeConfirmAction = null;
+    window.triggerCustomConfirm = function (title, msg, onConfirm) {
+      document.getElementById('confirm-title').innerText = title;
+      document.getElementById('confirm-message').innerText = msg;
+
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+      activeConfirmAction = onConfirm;
+    };
+
+    function closeConfirmModal() {
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.add('scale-95');
+      activeConfirmAction = null;
+    }
+
+    document.getElementById('confirm-cancel-btn').addEventListener('click', closeConfirmModal);
+    document.getElementById('confirm-ok-btn').addEventListener('click', () => {
+      if (activeConfirmAction) activeConfirmAction();
+      closeConfirmModal();
+    });
+
+    // PHOTOGRAPHER CRUD ACTION TRIGGERS
+    window.openPhotographerModal = function (id = '') {
+      const modal = document.getElementById('modal-photographer');
+      const form = document.getElementById('form-photographer');
+      form.reset();
+
+      if (id) {
+        document.getElementById('modal-photo-title').innerText = 'Edit Photographer';
+        const p = state.photographers.find(x => x.id === id);
+        if (p) {
+          document.getElementById('photo-id').value = p.id;
+          document.getElementById('photo-studio').value = p.studio;
+          document.getElementById('photo-lead').value = p.leadName;
+          document.getElementById('photo-status').value = p.status;
+          document.getElementById('photo-location').value = p.location || '';
+          document.getElementById('photo-instagram').value = p.instagram || '';
+          document.getElementById('photo-pricing').value = p.totalPricing;
+          document.getElementById('photo-advance').value = p.advancePaid || 0;
+          document.getElementById('photo-rating').value = p.rating;
+          document.getElementById('photo-team').value = p.teamSize || 1;
+          document.getElementById('photo-album').value = p.albumIncluded || 'No';
+          document.getElementById('photo-equipment').value = p.equipment || '';
+          document.getElementById('photo-deliverables').value = p.deliverables || '';
+          document.getElementById('photo-remarks').value = p.remarks || '';
+        }
+      } else {
+        document.getElementById('modal-photo-title').innerText = 'Add Photographer';
+        document.getElementById('photo-id').value = '';
+      }
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+    };
+
+    window.closePhotographerModal = function () {
+      const modal = document.getElementById('modal-photographer');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.add('scale-95');
+    };
+
+    window.savePhotographer = async function (e) {
+      e.preventDefault();
+      const id = document.getElementById('photo-id').value;
+      const record = {
+        studio: document.getElementById('photo-studio').value,
+        leadName: document.getElementById('photo-lead').value,
+        status: document.getElementById('photo-status').value,
+        location: document.getElementById('photo-location').value,
+        instagram: document.getElementById('photo-instagram').value,
+        totalPricing: parseFloat(document.getElementById('photo-pricing').value),
+        advancePaid: parseInt(document.getElementById('photo-advance').value) || 0,
+        rating: parseFloat(document.getElementById('photo-rating').value),
+        teamSize: parseInt(document.getElementById('photo-team').value) || 1,
+        albumIncluded: document.getElementById('photo-album').value,
+        equipment: document.getElementById('photo-equipment').value,
+        deliverables: document.getElementById('photo-deliverables').value,
+        remarks: document.getElementById('photo-remarks').value
+      };
+
+      try {
+        await dbHelper.saveRecord('photographers', id, record);
+        showToast(id ? 'Photographer details updated successfully.' : 'New photographer added to grid.', 'success');
+        closePhotographerModal();
+      } catch (err) {
+        showToast('Failed to save photographer.', 'error');
+      }
+    };
+
+    window.editPhotographer = function (id) {
+      openPhotographerModal(id);
+    };
+
+    window.deletePhotographerDialog = function (id) {
+      triggerCustomConfirm(
+        'Delete Photographer?',
+        'Are you sure you want to remove this photographer candidate from evaluation?',
+        async () => {
+          try {
+            await dbHelper.deleteRecord('photographers', id);
+            showToast('Photographer entry deleted.', 'success');
+          } catch (e) {
+            showToast('Failed to delete photographer.', 'error');
+          }
+        }
+      );
+    };
+
+    // SHOPPING CRUD ACTIONS
+    window.openShoppingModal = function (id = '') {
+      const modal = document.getElementById('modal-shopping');
+      const form = document.getElementById('form-shopping');
+      form.reset();
+
+      if (id) {
+        document.getElementById('modal-shop-title').innerText = 'Edit Registry Item';
+        const item = state.shopping.find(x => x.id === id);
+        if (item) {
+          document.getElementById('shop-id').value = item.id;
+          document.getElementById('shop-name').value = item.name;
+          document.getElementById('shop-qty').value = item.quantity;
+          document.getElementById('shop-status').value = item.status;
+          document.getElementById('shop-budget').value = item.budget;
+          document.getElementById('shop-notes').value = item.notes || '';
+        }
+      } else {
+        document.getElementById('modal-shop-title').innerText = 'Add Registry Item';
+        document.getElementById('shop-id').value = '';
+      }
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+    };
+
+    window.closeShoppingModal = function () {
+      const modal = document.getElementById('modal-shopping');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.add('scale-95');
+    };
+
+    window.saveShoppingItem = async function (e) {
+      e.preventDefault();
+      const id = document.getElementById('shop-id').value;
+      const record = {
+        name: document.getElementById('shop-name').value,
+        quantity: document.getElementById('shop-qty').value,
+        status: document.getElementById('shop-status').value,
+        budget: parseFloat(document.getElementById('shop-budget').value),
+        notes: document.getElementById('shop-notes').value
+      };
+
+      try {
+        await dbHelper.saveRecord('shopping', id, record);
+        showToast(id ? 'Sourcing item updated.' : 'Item added to registry.', 'success');
+        closeShoppingModal();
+      } catch (err) {
+        showToast('Failed to save sourcing item.', 'error');
+      }
+    };
+
+    window.editShoppingItem = function (id) {
+      openShoppingModal(id);
+    };
+
+    window.updateShoppingStatus = async function (id, statusVal) {
+      const item = state.shopping.find(x => x.id === id);
+      if (!item) return;
+      try {
+        await dbHelper.saveRecord('shopping', id, { ...item, status: statusVal });
+        showToast(`Item status set to ${statusVal}.`, 'success');
+      } catch (e) {
+        showToast('Failed to change status.', 'error');
+      }
+    };
+
+    window.deleteShoppingItemDialog = function (id) {
+      triggerCustomConfirm(
+        'Delete Sourcing Item?',
+        'Remove this item from the wedding procurement list?',
+        async () => {
+          try {
+            await dbHelper.deleteRecord('shopping', id);
+            showToast('Item deleted from registry.', 'success');
+          } catch (e) {
+            showToast('Failed to delete item.', 'error');
+          }
+        }
+      );
+    };
+
+    // GUEST LIST CRUD ACTIONS
+    window.openGuestModal = function (id = '') {
+      const modal = document.getElementById('modal-guest');
+      const form = document.getElementById('form-guest');
+      form.reset();
+
+      if (id) {
+        document.getElementById('modal-guest-title').innerText = 'Edit Guest Family';
+        const g = state.guests.find(x => x.id === id);
+        if (g) {
+          document.getElementById('guest-id').value = g.id;
+          document.getElementById('guest-name').value = g.name;
+          document.getElementById('guest-side').value = g.side;
+          document.getElementById('guest-count').value = g.accompanyingCount;
+          document.getElementById('guest-rsvp').value = g.rsvpStatus;
+          document.getElementById('guest-location').value = g.location || '';
+          document.getElementById('guest-phone').value = g.phone || '';
+        }
+      } else {
+        document.getElementById('modal-guest-title').innerText = 'Add Guest Family';
+        document.getElementById('guest-id').value = '';
+      }
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+    };
+
+    window.closeGuestModal = function () {
+      const modal = document.getElementById('modal-guest');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.add('scale-95');
+    };
+
+    window.saveGuest = async function (e) {
+      e.preventDefault();
+      const id = document.getElementById('guest-id').value;
+      const record = {
+        name: document.getElementById('guest-name').value,
+        side: document.getElementById('guest-side').value,
+        accompanyingCount: parseInt(document.getElementById('guest-count').value) || 0,
+        rsvpStatus: document.getElementById('guest-rsvp').value,
+        location: document.getElementById('guest-location').value,
+        phone: document.getElementById('guest-phone').value
+      };
+
+      try {
+        await dbHelper.saveRecord('guests', id, record);
+        showToast(id ? 'Guest family updated.' : 'New guest added.', 'success');
+        closeGuestModal();
+      } catch (err) {
+        showToast('Failed to save guest.', 'error');
+      }
+    };
+
+    window.editGuest = function (id) {
+      openGuestModal(id);
+    };
+
+    window.updateGuestRsvp = async function (id, rsvpVal) {
+      const guest = state.guests.find(x => x.id === id);
+      if (!guest) return;
+      try {
+        await dbHelper.saveRecord('guests', id, { ...guest, rsvpStatus: rsvpVal });
+        showToast(`Guest RSVP set to ${rsvpVal}.`, 'success');
+      } catch (e) {
+        showToast('Failed to update RSVP.', 'error');
+      }
+    };
+
+    window.deleteGuestDialog = function (id) {
+      triggerCustomConfirm(
+        'Delete Guest?',
+        'Are you sure you want to remove this family from the guest list?',
+        async () => {
+          try {
+            await dbHelper.deleteRecord('guests', id);
+            showToast('Guest family removed.', 'success');
+          } catch (e) {
+            showToast('Failed to delete guest.', 'error');
+          }
+        }
+      );
+    };
+
+    // AGILE KANBAN CRUD ACTIONS
+    window.openTaskModal = function (id = '') {
+      const modal = document.getElementById('modal-task');
+      const form = document.getElementById('form-task');
+      form.reset();
+
+      if (id) {
+        document.getElementById('modal-task-title').innerText = 'Edit Timeline Task';
+        const task = state.tasks.find(x => x.id === id);
+        if (task) {
+          document.getElementById('task-id').value = task.id;
+          document.getElementById('task-title').value = task.title;
+          document.getElementById('task-column').value = task.column;
+        }
+      } else {
+        document.getElementById('modal-task-title').innerText = 'Add Timeline Task';
+        document.getElementById('task-id').value = '';
+      }
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+    };
+
+    window.closeTaskModal = function () {
+      const modal = document.getElementById('modal-task');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.add('scale-95');
+    };
+
+    window.saveTask = async function (e) {
+      e.preventDefault();
+      const id = document.getElementById('task-id').value;
+      const column = document.getElementById('task-column').value;
+      const record = {
+        title: document.getElementById('task-title').value,
+        column: column,
+        status: id ? (state.tasks.find(x => x.id === id).status || 'Pending') : 'Pending'
+      };
+
+      try {
+        await dbHelper.saveRecord('tasks', id, record);
+        showToast(id ? 'Task details updated.' : 'Timeline task added.', 'success');
+        closeTaskModal();
+      } catch (err) {
+        showToast('Failed to save timeline task.', 'error');
+      }
+    };
+
+    window.editTask = function (id) {
+      openTaskModal(id);
+    };
+
+    window.toggleTaskStatus = async function (id, isCompleted) {
+      const task = state.tasks.find(x => x.id === id);
+      if (!task) return;
+      try {
+        await dbHelper.saveRecord('tasks', id, { ...task, status: isCompleted ? 'Completed' : 'Pending' });
+        showToast(isCompleted ? 'Task marked Completed.' : 'Task set to Pending.', 'success');
+      } catch (e) {
+        showToast('Failed to toggle task.', 'error');
+      }
+    };
+
+    window.deleteTaskDialog = function (id) {
+      triggerCustomConfirm(
+        'Delete Task?',
+        'Remove this item from the timeline checklist?',
+        async () => {
+          try {
+            await dbHelper.deleteRecord('tasks', id);
+            showToast('Timeline task deleted.', 'success');
+          } catch (e) {
+            showToast('Failed to delete task.', 'error');
+          }
+        }
+      );
+    };
+
+    // ==========================================
+    // EXPENSES RENDERER & ACTIONS
+    // ==========================================
+    function renderExpenses() {
+      const tbody = document.getElementById("expense-table-body");
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      let list = state.expenses;
+      const budget = state.expenseBudget || 500000;
+
+      // Filter & Search client-side
+      const query = state.filters.expenseSearch.toLowerCase();
+      const catFilter = state.filters.expenseCategory;
+      const statusFilter = state.filters.expenseStatus;
+
+      list = list.filter(exp => {
+        const matchesQuery = exp.title.toLowerCase().includes(query) || (exp.vendor && exp.vendor.toLowerCase().includes(query)) || (exp.remarks && exp.remarks.toLowerCase().includes(query));
+        const matchesCat = catFilter === 'All' || exp.category === catFilter;
+        const matchesStatus = statusFilter === 'All' || exp.status === statusFilter;
+        return matchesQuery && matchesCat && matchesStatus;
+      });
+
+      // Stats calculations
+      const totalSpent = state.expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+      const paidSpent = state.expenses.filter(exp => exp.status === 'Paid').reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+      const pendingSpent = state.expenses.filter(exp => exp.status === 'Pending').reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+      const remainingBalance = budget - totalSpent;
+
+      const paidCount = state.expenses.filter(exp => exp.status === 'Paid').length;
+      const pendingCount = state.expenses.filter(exp => exp.status === 'Pending').length;
+
+      // Update stat card UI elements
+      document.getElementById("expense-stat-budget").innerText = `₹${budget.toLocaleString('en-IN')}`;
+      document.getElementById("expense-stat-spent").innerText = `₹${totalSpent.toLocaleString('en-IN')}`;
+
+      const spentPercentage = budget > 0 ? (totalSpent / budget) * 100 : 0;
+      document.getElementById("spent-percentage").innerText = `${Math.round(spentPercentage)}% of budget used`;
+
+      document.getElementById("expense-stat-remaining").innerText = `₹${remainingBalance.toLocaleString('en-IN')}`;
+      const statusEl = document.getElementById("remaining-status");
+      if (remainingBalance < 0) {
+        statusEl.innerText = "Over Budget ⚠️";
+        statusEl.className = "text-[10px] text-rose-600 mt-2 font-mono font-bold animate-pulse";
+      } else {
+        statusEl.innerText = "Under Budget";
+        statusEl.className = "text-[10px] text-emerald-600 mt-2 font-mono";
+      }
+
+      document.getElementById("expense-stat-paid").innerText = `₹${paidSpent.toLocaleString('en-IN')}`;
+      document.getElementById("paid-count").innerText = `${paidCount} transaction${paidCount === 1 ? '' : 's'} settled`;
+
+      document.getElementById("expense-stat-pending").innerText = `₹${pendingSpent.toLocaleString('en-IN')}`;
+      document.getElementById("pending-count").innerText = `${pendingCount} transaction${pendingCount === 1 ? '' : 's'} remaining`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-12 text-center text-slate-500 font-medium">
+              <i data-lucide="indian-rupee" class="w-8 h-8 mx-auto mb-2 text-slate-600"></i>
+              <span>No expense transactions logged.</span>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      list.forEach(exp => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition border-b border-slate-100';
+
+        const statusBadges = {
+          'Paid': 'bg-emerald-50 text-emerald-600 border-emerald-250',
+          'Pending': 'bg-amber-50 text-amber-600 border-amber-250'
+        };
+
+        tr.innerHTML = `
+          <td class="py-4 px-6 font-semibold text-slate-800">${exp.title}</td>
+          <td class="py-4 px-6 font-mono text-xs text-indigo-650 font-semibold">${exp.category}</td>
+          <td class="py-4 px-6 text-center">
+            <select onchange="updateExpenseStatus('${exp.id}', this.value)" class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadges[exp.status]} bg-white focus:outline-none cursor-pointer">
+              <option value="Paid" ${exp.status === 'Paid' ? 'selected' : ''}>Paid</option>
+              <option value="Pending" ${exp.status === 'Pending' ? 'selected' : ''}>Pending</option>
+            </select>
+          </td>
+          <td class="py-4 px-6 text-slate-850 font-bold font-mono">₹${parseFloat(exp.amount).toLocaleString('en-IN')}</td>
+          <td class="py-4 px-6 text-slate-700">${exp.vendor || '—'}</td>
+          <td class="py-4 px-6 text-slate-500 italic text-xs truncate max-w-[200px]" title="${exp.remarks || ''}">${exp.remarks || '—'}</td>
+          <td class="py-4 px-6 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              <button onclick="editExpense('${exp.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition shadow-sm">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteExpenseDialog('${exp.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-lg transition shadow-sm">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // BUDGET ACTIONS
+    window.toggleEditBudget = function () {
+      const budgetView = document.getElementById("budget-view");
+      const budgetEdit = document.getElementById("budget-edit-input-container");
+      const btn = document.getElementById("btn-edit-budget");
+
+      if (budgetEdit.classList.contains("hidden")) {
+        budgetEdit.classList.remove("hidden");
+        budgetView.classList.add("hidden");
+        document.getElementById("input-expense-budget").value = state.expenseBudget;
+        btn.innerHTML = `<i data-lucide="x" class="w-3 h-3"></i><span>Cancel</span>`;
+      } else {
+        budgetEdit.classList.add("hidden");
+        budgetView.classList.remove("hidden");
+        btn.innerHTML = `<i data-lucide="edit-2" class="w-3 h-3"></i><span>Edit</span>`;
+      }
+      lucide.createIcons();
+    };
+
+    window.saveBudget = async function () {
+      const val = parseFloat(document.getElementById("input-expense-budget").value);
+      if (isNaN(val) || val < 0) {
+        showToast("Please enter a valid budget amount.", "error");
+        return;
+      }
+      try {
+        await dbHelper.saveBudget(val);
+        showToast("Expense budget updated.", "success");
+        toggleEditBudget();
+      } catch (e) {
+        showToast("Failed to save budget.", "error");
+      }
+    };
+
+    // EXPENSE ACTIONS
+    window.updateExpenseStatus = async function (id, statusVal) {
+      const exp = state.expenses.find(x => x.id === id);
+      if (!exp) return;
+      try {
+        await dbHelper.saveRecord('expenses', id, { ...exp, status: statusVal });
+        showToast(`Transaction set to ${statusVal}.`, 'success');
+      } catch (e) {
+        showToast('Failed to update status.', 'error');
+      }
+    };
+
+    window.openExpenseModal = function (id = '') {
+      const modal = document.getElementById('modal-expense');
+      const form = document.getElementById('form-expense');
+      form.reset();
+
+      if (id) {
+        document.getElementById('modal-expense-title').innerText = 'Edit Expense Record';
+        const exp = state.expenses.find(x => x.id === id);
+        if (exp) {
+          document.getElementById('expense-id').value = exp.id;
+          document.getElementById('expense-title').value = exp.title;
+          document.getElementById('expense-category').value = exp.category;
+          document.getElementById('expense-status').value = exp.status;
+          document.getElementById('expense-amount').value = exp.amount;
+          document.getElementById('expense-vendor').value = exp.vendor || '';
+          document.getElementById('expense-remarks').value = exp.remarks || '';
+        }
+      } else {
+        document.getElementById('modal-expense-title').innerText = 'Record Expense';
+        document.getElementById('expense-id').value = '';
+      }
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+    };
+
+    window.closeExpenseModal = function () {
+      const modal = document.getElementById('modal-expense');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.add('scale-95');
+    };
+
+    window.saveExpense = async function (e) {
+      e.preventDefault();
+      const id = document.getElementById('expense-id').value;
+      const record = {
+        title: document.getElementById('expense-title').value,
+        category: document.getElementById('expense-category').value,
+        status: document.getElementById('expense-status').value,
+        amount: parseFloat(document.getElementById('expense-amount').value) || 0,
+        vendor: document.getElementById('expense-vendor').value,
+        remarks: document.getElementById('expense-remarks').value
+      };
+
+      try {
+        await dbHelper.saveRecord('expenses', id, record);
+        showToast(id ? 'Expense details updated.' : 'New transaction recorded.', 'success');
+        closeExpenseModal();
+      } catch (err) {
+        showToast('Failed to save expense details.', 'error');
+      }
+    };
+
+    window.editExpense = function (id) {
+      openExpenseModal(id);
+    };
+
+    window.deleteExpenseDialog = function (id) {
+      triggerCustomConfirm(
+        'Delete Transaction?',
+        'Are you sure you want to delete this expense record?',
+        async () => {
+          try {
+            await dbHelper.deleteRecord('expenses', id);
+            showToast('Expense record deleted.', 'success');
+          } catch (e) {
+            showToast('Failed to delete expense record.', 'error');
+          }
+        }
+      );
+    };
+
+    // INSTANT LINK SHARING PANEL
+    window.copyWorkspaceLink = function () {
+      const dummy = document.createElement('input');
+      dummy.value = window.location.href;
+      document.body.appendChild(dummy);
+      dummy.select();
+
+      try {
+        const success = document.execCommand('copy');
+        if (success) {
+          showToast("Workspace Link Copied! Send this to your family on WhatsApp.", "success");
+        } else {
+          showToast("Failed to copy link.", "error");
+        }
+      } catch (err) {
+        showToast("Error copying link.", "error");
+      }
+
+      document.body.removeChild(dummy);
+    };
+
+    // ==========================================
+    // INITIALIZATION RUN
+    // ==========================================
+    async function run() {
+      dbHelper = new CollaborativeDB();
+      await dbHelper.initialize();
+    }
+
+    run();
+  </script>
+</body>
+
+</html>

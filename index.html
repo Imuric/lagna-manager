@@ -534,17 +534,25 @@
           <select id="photo-filter-status"
             class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
             <option value="All">All Statuses</option>
+            <option value="Inquiry">Inquiry</option>
             <option value="Available">Available</option>
             <option value="Tentative">Tentative</option>
             <option value="Booked">Booked</option>
           </select>
         </div>
 
-        <button onclick="openPhotographerModal()"
-          class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm">
-          <i data-lucide="plus" class="w-4 h-4"></i>
-          <span>Add Candidate</span>
-        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button onclick="bulkSeedPhotographers()"
+            class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 font-semibold text-sm transition-all duration-200 border border-slate-200 cursor-pointer">
+            <i data-lucide="database" class="w-4 h-4"></i>
+            <span>Bulk Seed</span>
+          </button>
+          <button onclick="openPhotographerModal()"
+            class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Add Candidate</span>
+          </button>
+        </div>
       </div>
 
       <!-- Photographers Grid Container -->
@@ -1001,6 +1009,7 @@
               Status</label>
             <select id="photo-status"
               class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              <option value="Inquiry">Inquiry</option>
               <option value="Available">Available</option>
               <option value="Tentative">Tentative</option>
               <option value="Booked">Booked</option>
@@ -2538,6 +2547,7 @@
       list.forEach(p => {
         const isRank1 = p.id === photoObj.rank1Id;
         const statusColors = {
+          'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
           'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
           'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
           'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
@@ -3098,6 +3108,40 @@
             showToast('Photographer entry deleted.', 'success');
           } catch (e) {
             showToast('Failed to delete photographer.', 'error');
+          }
+        }
+      );
+    };
+
+    window.bulkSeedPhotographers = function () {
+      if (!requireGoogleAuth()) return;
+      triggerCustomConfirm(
+        'Seed Bulk Photographers?',
+        'Are you sure you want to load the 23 photographer candidates? This will replace your current photographer candidates list.',
+        async () => {
+          const seedData = getInitialPhotographersData();
+          if (dbHelper.isMock) {
+            const key = `lagnamanager_${dbHelper.appId}_photographers`;
+            localStorage.setItem(key, JSON.stringify(seedData));
+            dbHelper.pullMockData();
+            showToast('Successfully seeded 23 photographers locally!', 'success');
+          } else {
+            try {
+              showToast('Seeding photographers to cloud...', 'info');
+              const colRef = collection(dbHelper.db, 'artifacts', dbHelper.appId, 'public', 'data', 'photographers');
+              const snapshot = await getDocs(colRef);
+              for (let docSnap of snapshot.docs) {
+                await deleteDoc(docSnap.ref);
+              }
+              for (let item of seedData) {
+                const docRef = doc(dbHelper.db, 'artifacts', dbHelper.appId, 'public', 'data', 'photographers', item.id);
+                await setDoc(docRef, item);
+              }
+              showToast('Successfully seeded 23 photographers to cloud!', 'success');
+            } catch (e) {
+              console.error('Error seeding to cloud:', e);
+              showToast('Failed to seed photographers to cloud.', 'error');
+            }
           }
         }
       );

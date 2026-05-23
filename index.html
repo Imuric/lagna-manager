@@ -2649,91 +2649,95 @@
         });
         container.appendChild(gridDiv);
       } else {
-        renderPhotographerTable(    // ==========================================
-          // OTHER VENDORS SCORING & RENDERING LOGIC
-          // ==========================================
-          function calculateVendorQualityScore(equip, teamSize) {
-            if (!equip) return 3.0;
-            const keywords = ['pro', 'sound', 'light', 'floral', 'traditional', 'mic', 'stage', 'hall', 'catering', 'food', 'makeup', 'brush', 'artist', '5+', '10+', 'experience', 'years', 'quality', 'setup'];
-            let count = 0;
-            const eqLower = equip.toLowerCase();
-            keywords.forEach(word => {
-              if (eqLower.includes(word)) count++;
-            });
-            let score = 2.0 + (count * 1.5);
-            if (teamSize && parseInt(teamSize) > 2) score += 1.5;
-            return Math.min(10, Math.max(1, score));
-          }
+        renderPhotographerTable(list, photoObj.rank1Id);
+      }
+    }
 
-     function calculateVendorPricingScore(price, category, allVendors) {
-            const sameCatVendors = allVendors.filter(v => v.category === category);
-            if (sameCatVendors.length <= 1) return 10.0;
-            const prices = sameCatVendors.map(v => parseFloat(v.totalPricing) || 0);
-            const minPrice = Math.min(...prices);
-            const maxPrice = Math.max(...prices);
-            if (maxPrice === minPrice) return 10.0;
-            return 2.0 + 8.0 * ((maxPrice - price) / (maxPrice - minPrice));
-          }
+    // ==========================================
+    // OTHER VENDORS SCORING & RENDERING LOGIC
+    // ==========================================
+    function calculateVendorQualityScore(equip, teamSize) {
+      if (!equip) return 3.0;
+      const keywords = ['pro', 'sound', 'light', 'floral', 'traditional', 'mic', 'stage', 'hall', 'catering', 'food', 'makeup', 'brush', 'artist', '5+', '10+', 'experience', 'years', 'quality', 'setup'];
+      let count = 0;
+      const eqLower = equip.toLowerCase();
+      keywords.forEach(word => {
+        if (eqLower.includes(word)) count++;
+      });
+      let score = 2.0 + (count * 1.5);
+      if (teamSize && parseInt(teamSize) > 2) score += 1.5;
+      return Math.min(10, Math.max(1, score));
+    }
 
-     function getRankedVendors() {
-            const vendors = state.vendors;
-            const weights = state.vendorWeights;
+    function calculateVendorPricingScore(price, category, allVendors) {
+      const sameCatVendors = allVendors.filter(v => v.category === category);
+      if (sameCatVendors.length <= 1) return 10.0;
+      const prices = sameCatVendors.map(v => parseFloat(v.totalPricing) || 0);
+      const minPrice = Math.min(...prices);
+      const maxPrice = Math.max(...prices);
+      if (maxPrice === minPrice) return 10.0;
+      return 2.0 + 8.0 * ((maxPrice - price) / (maxPrice - minPrice));
+    }
 
-            const calculated = vendors.map(v => {
-              const qScore = calculateVendorQualityScore(v.equipment, v.teamSize);
-              const prScore = calculateVendorPricingScore(v.totalPricing, v.category, vendors);
-              const subScore = parseFloat(v.rating) || 5.0;
+    function getRankedVendors() {
+      const vendors = state.vendors;
+      const weights = state.vendorWeights;
 
-              const finalScore = (qScore * weights[0] + prScore * weights[1] + subScore * weights[2]) / 100;
-              return {
-                ...v,
-                qScore: qScore.toFixed(1),
-                prScore: prScore.toFixed(1),
-                finalScore: parseFloat(finalScore.toFixed(2))
-              };
-            });
+      const calculated = vendors.map(v => {
+        const qScore = calculateVendorQualityScore(v.equipment, v.teamSize);
+        const prScore = calculateVendorPricingScore(v.totalPricing, v.category, vendors);
+        const subScore = parseFloat(v.rating) || 5.0;
 
-            const categories = ['Singer', 'Anchor', 'Decorator', 'Caterer', 'Makeup Artist', 'Other'];
-            const rank1Ids = {};
-            categories.forEach(cat => {
-              const catVendors = calculated.filter(v => v.category === cat && v.status !== 'Booked');
-              if (catVendors.length > 0) {
-                let best = catVendors[0];
-                catVendors.forEach(v => {
-                  if (v.finalScore > best.finalScore) {
-                    best = v;
-                  }
-                });
-                rank1Ids[cat] = best.id;
-              }
-            });
+        const finalScore = (qScore * weights[0] + prScore * weights[1] + subScore * weights[2]) / 100;
+        return {
+          ...v,
+          qScore: qScore.toFixed(1),
+          prScore: prScore.toFixed(1),
+          finalScore: parseFloat(finalScore.toFixed(2))
+        };
+      });
 
-            return {
-              list: calculated,
-              rank1Ids: rank1Ids
-            };
-          }
+      const categories = ['Singer', 'Anchor', 'Decorator', 'Caterer', 'Makeup Artist', 'Other'];
+      const rank1Ids = {};
+      categories.forEach(cat => {
+        const catVendors = calculated.filter(v => v.category === cat && v.status !== 'Booked');
+        if (catVendors.length > 0) {
+          let best = catVendors[0];
+          catVendors.forEach(v => {
+            if (v.finalScore > best.finalScore) {
+              best = v;
+            }
+          });
+          rank1Ids[cat] = best.id;
+        }
+      });
+
+      return {
+        list: calculated,
+        rank1Ids: rank1Ids
+      };
+    }
 
     // HELPERS: RENDER OTHER VENDORS TABLE VIEW
     function renderVendorTable(list, rank1Ids) {
-            const container = document.getElementById("vendors-view-container");
-            const tableWrapper = document.createElement('div');
-            tableWrapper.className = 'overflow-x-auto bg-white border border-slate-200 rounded-3xl shadow-sm';
+      const container = document.getElementById("vendors-view-container");
+      const tableWrapper = document.createElement('div');
+      tableWrapper.className = 'overflow-x-auto bg-white border border-slate-200 rounded-3xl shadow-sm';
 
-            const statusColors = {
-              'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
-              'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
-              'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
-              'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
-            };
+      const statusColors = {
+        'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+        'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+        'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
+        'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
+      };
 
-            let tbodyContent = '';
-            list.forEach(v => {
-              const isRank1 = rank1Ids[v.category] === v.id;
-              const totalPricingFormatted = parseFloat(v.totalPricing || 0).toLocaleString('en-IN');
-              const advancePaidFormatted = parseFloat(v.advancePaid || 0).toLocaleString('en-IN');
+      let tbodyContent = '';
+      list.forEach(v => {
+        const isRank1 = rank1Ids[v.category] === v.id;
+        const totalPricingFormatted = parseFloat(v.totalPricing || 0).toLocaleString('en-IN');
+        const advancePaidFormatted = parseFloat(v.advancePaid || 0).toLocaleString('en-IN');
 
-              tbodyContent += `
+        tbodyContent += `
           <tr class="hover:bg-slate-50/80 transition border-b border-slate-100 text-slate-700">
             <td class="px-6 py-4">
               <div>
@@ -2796,9 +2800,9 @@
             ` : ''}
           </tr>
         `;
-            });
+      });
 
-            tableWrapper.innerHTML = `
+      tableWrapper.innerHTML = `
         <table class="w-full text-left border-collapse text-sm">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-mono text-[10px] uppercase font-bold tracking-wider">
@@ -2818,68 +2822,68 @@
           </tbody>
         </table>
       `;
-            container.appendChild(tableWrapper);
-          }
+      container.appendChild(tableWrapper);
+    }
 
     // RENDER: OTHER VENDORS MATRIX (GRID)
     function renderVendorMatrix(vendorObj) {
-            // Sync layout buttons UI
-            const btnGrid = document.getElementById("btn-vendor-layout-grid");
-            const btnTable = document.getElementById("btn-vendor-layout-table");
-            if (btnGrid && btnTable) {
-              if (state.vendorLayout === 'grid') {
-                btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm";
-                btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 hover:text-slate-800";
-              } else {
-                btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 hover:text-slate-800";
-                btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm";
-              }
-            }
+      // Sync layout buttons UI
+      const btnGrid = document.getElementById("btn-vendor-layout-grid");
+      const btnTable = document.getElementById("btn-vendor-layout-table");
+      if (btnGrid && btnTable) {
+        if (state.vendorLayout === 'grid') {
+          btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm";
+          btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 hover:text-slate-800";
+        } else {
+          btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 hover:text-slate-800";
+          btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm";
+        }
+      }
 
-            const container = document.getElementById("vendors-view-container");
-            container.innerHTML = '';
+      const container = document.getElementById("vendors-view-container");
+      container.innerHTML = '';
 
-            let list = vendorObj.list;
+      let list = vendorObj.list;
 
-            // Filter & Search client-side
-            const query = state.filters.vendorSearch.toLowerCase();
-            const catFilter = state.filters.vendorCategory;
-            const statusFilter = state.filters.vendorStatus;
+      // Filter & Search client-side
+      const query = state.filters.vendorSearch.toLowerCase();
+      const catFilter = state.filters.vendorCategory;
+      const statusFilter = state.filters.vendorStatus;
 
-            list = list.filter(v => {
-              const matchesQuery = v.studio.toLowerCase().includes(query) || v.leadName.toLowerCase().includes(query) || v.location.toLowerCase().includes(query);
-              const matchesCat = catFilter === 'All' || v.category === catFilter;
-              const matchesStatus = statusFilter === 'All' || v.status === statusFilter;
-              return matchesQuery && matchesCat && matchesStatus;
-            });
+      list = list.filter(v => {
+        const matchesQuery = v.studio.toLowerCase().includes(query) || v.leadName.toLowerCase().includes(query) || v.location.toLowerCase().includes(query);
+        const matchesCat = catFilter === 'All' || v.category === catFilter;
+        const matchesStatus = statusFilter === 'All' || v.status === statusFilter;
+        return matchesQuery && matchesCat && matchesStatus;
+      });
 
-            if (list.length === 0) {
-              container.innerHTML = `
+      if (list.length === 0) {
+        container.innerHTML = `
           <div class="w-full py-12 text-center text-slate-500 border border-dashed border-slate-200 rounded-3xl bg-white shadow-sm">
             <i data-lucide="briefcase" class="w-8 h-8 mx-auto mb-2 text-slate-400"></i>
             <p class="text-sm font-medium">No vendors match the filters.</p>
           </div>
         `;
-              return;
-            }
+        return;
+      }
 
-            if (state.vendorLayout === 'grid') {
-              const gridDiv = document.createElement('div');
-              gridDiv.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+      if (state.vendorLayout === 'grid') {
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
 
-              list.forEach(v => {
-                const isRank1 = vendorObj.rank1Ids[v.category] === v.id;
-                const statusColors = {
-                  'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
-                  'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
-                  'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
-                  'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
-                };
+        list.forEach(v => {
+          const isRank1 = vendorObj.rank1Ids[v.category] === v.id;
+          const statusColors = {
+            'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+            'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+            'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
+            'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
+          };
 
-                const card = document.createElement('div');
-                card.className = `relative bg-white border ${isRank1 ? 'border-indigo-500 pulse-glow' : 'border-slate-200'} rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between`;
+          const card = document.createElement('div');
+          card.className = `relative bg-white border ${isRank1 ? 'border-indigo-500 pulse-glow' : 'border-slate-200'} rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between`;
 
-                card.innerHTML = `
+          card.innerHTML = `
             <div>
               <!-- Top badges -->
               <div class="flex items-center justify-between mb-4">
@@ -2968,376 +2972,375 @@
               </div>
             ` : ''}
           `;
-                gridDiv.appendChild(card);
-              });
-              container.appendChild(gridDiv);
-            } else {
-              renderVendorTable(list, vendorObj.rank1Ids);
-            }
-          }
+          gridDiv.appendChild(card);
+        });
+        container.appendChild(gridDiv);
+      } else {
+        renderVendorTable(list, vendorObj.rank1Ids);
+      }
+    }
 
     window.setVendorLayout = function (layout) {
-            state.vendorLayout = layout;
-            triggerAllRenders();
-          }; ount === 0) makeEmpty(col3, 'No tasks in Phase 3');
+      state.vendorLayout = layout;
+      triggerAllRenders();
+    };
+
+    // ==========================================
+    // CONTROLLERS & ACTIONS
+    // ==========================================
+
+    // Dynamic Slider Weight Rebalancing
+    window.handleWeightSliderChange = function (changedIndex, newValue) {
+      let weights = [
+        parseFloat(document.getElementById('weight-equipment').value),
+        parseFloat(document.getElementById('weight-pricing').value),
+        parseFloat(document.getElementById('weight-rating').value)
+      ];
+      let oldVal = state.weights[changedIndex];
+      let delta = newValue - oldVal;
+      weights[changedIndex] = newValue;
+
+      let otherIndices = [0, 1, 2].filter(idx => idx !== changedIndex);
+      let sumOthers = weights[otherIndices[0]] + weights[otherIndices[1]];
+
+      if (sumOthers > 0) {
+        weights[otherIndices[0]] -= delta * (weights[otherIndices[0]] / sumOthers);
+        weights[otherIndices[1]] -= delta * (weights[otherIndices[1]] / sumOthers);
+      } else {
+        weights[otherIndices[0]] -= delta / 2;
+        weights[otherIndices[1]] -= delta / 2;
       }
 
-      // ==========================================
-      // CONTROLLERS & ACTIONS
-      // ==========================================
-
-      // Dynamic Slider Weight Rebalancing
-      window.handleWeightSliderChange = function (changedIndex, newValue) {
-        let weights = [
-          parseFloat(document.getElementById('weight-equipment').value),
-          parseFloat(document.getElementById('weight-pricing').value),
-          parseFloat(document.getElementById('weight-rating').value)
-        ];
-        let oldVal = state.weights[changedIndex];
-        let delta = newValue - oldVal;
-        weights[changedIndex] = newValue;
-
-        let otherIndices = [0, 1, 2].filter(idx => idx !== changedIndex);
-        let sumOthers = weights[otherIndices[0]] + weights[otherIndices[1]];
-
-        if (sumOthers > 0) {
-          weights[otherIndices[0]] -= delta * (weights[otherIndices[0]] / sumOthers);
-          weights[otherIndices[1]] -= delta * (weights[otherIndices[1]] / sumOthers);
-        } else {
-          weights[otherIndices[0]] -= delta / 2;
-          weights[otherIndices[1]] -= delta / 2;
-        }
-
-        for (let i = 0; i < 3; i++) {
-          weights[i] = Math.max(0, Math.min(100, weights[i]));
-        }
-
-        let currentSum = weights[0] + weights[1] + weights[2];
-        let diff = 100 - currentSum;
-        let adjustIdx = otherIndices[0];
-        weights[adjustIdx] += diff;
-        weights[adjustIdx] = Math.max(0, Math.min(100, weights[adjustIdx]));
-
-        state.weights = weights;
-
-        // Update slider positions
-        document.getElementById('weight-equipment').value = weights[0].toFixed(1);
-        document.getElementById('weight-pricing').value = weights[1].toFixed(1);
-        document.getElementById('weight-rating').value = weights[2].toFixed(1);
-
-        document.getElementById('weight-equipment-val').innerText = Math.round(weights[0]) + '%';
-        document.getElementById('weight-pricing-val').innerText = Math.round(weights[1]) + '%';
-        document.getElementById('weight-rating-val').innerText = Math.round(weights[2]) + '%';
-
-        triggerAllRenders();
-      };
-
-      // Bind slider inputs
-      document.getElementById('weight-equipment').addEventListener('input', (e) => handleWeightSliderChange(0, parseFloat(e.target.value)));
-      document.getElementById('weight-pricing').addEventListener('input', (e) => handleWeightSliderChange(1, parseFloat(e.target.value)));
-      document.getElementById('weight-rating').addEventListener('input', (e) => handleWeightSliderChange(2, parseFloat(e.target.value)));
-
-      // SEARCH & FILTER TRIGGERS
-      document.getElementById('photo-search').addEventListener('input', (e) => {
-        state.filters.photoSearch = e.target.value;
-        triggerAllRenders();
-      });
-      document.getElementById('photo-filter-status').addEventListener('change', (e) => {
-        state.filters.photoStatus = e.target.value;
-        triggerAllRenders();
-      });
-      document.getElementById('vendor-search').addEventListener('input', (e) => {
-        state.filters.vendorSearch = e.target.value;
-        triggerAllRenders();
-      });
-      document.getElementById('vendor-filter-category').addEventListener('change', (e) => {
-        state.filters.vendorCategory = e.target.value;
-        triggerAllRenders();
-      });
-      document.getElementById('vendor-filter-status').addEventListener('change', (e) => {
-        state.filters.vendorStatus = e.target.value;
-        triggerAllRenders();
-      });
-      document.getElementById('expense-search').addEventListener('input', (e) => {
-        state.filters.expenseSearch = e.target.value;
-        triggerAllRenders();
-      });
-      document.getElementById('expense-filter-category').addEventListener('change', (e) => {
-        state.filters.expenseCategory = e.target.value;
-        triggerAllRenders();
-      });
-      document.getElementById('expense-filter-status').addEventListener('change', (e) => {
-        state.filters.expenseStatus = e.target.value;
-        triggerAllRenders();
-      });
-
-      // Custom Destructive Confirm dialogues
-      let activeConfirmAction = null;
-      window.triggerCustomConfirm = function (title, msg, onConfirm) {
-        document.getElementById('confirm-title').innerText = title;
-        document.getElementById('confirm-message').innerText = msg;
-
-        const modal = document.getElementById('confirm-modal');
-        modal.classList.remove('opacity-0', 'pointer-events-none');
-        modal.querySelector('div').classList.remove('scale-95');
-        activeConfirmAction = onConfirm;
-      };
-
-      function closeConfirmModal() {
-        const modal = document.getElementById('confirm-modal');
-        modal.classList.add('opacity-0', 'pointer-events-none');
-        modal.querySelector('div').classList.add('scale-95');
-        activeConfirmAction = null;
+      for (let i = 0; i < 3; i++) {
+        weights[i] = Math.max(0, Math.min(100, weights[i]));
       }
 
-      document.getElementById('confirm-cancel-btn').addEventListener('click', closeConfirmModal);
-      document.getElementById('confirm-ok-btn').addEventListener('click', () => {
-        if (activeConfirmAction) activeConfirmAction();
-        closeConfirmModal();
+      let currentSum = weights[0] + weights[1] + weights[2];
+      let diff = 100 - currentSum;
+      let adjustIdx = otherIndices[0];
+      weights[adjustIdx] += diff;
+      weights[adjustIdx] = Math.max(0, Math.min(100, weights[adjustIdx]));
+
+      state.weights = weights;
+
+      // Update slider positions
+      document.getElementById('weight-equipment').value = weights[0].toFixed(1);
+      document.getElementById('weight-pricing').value = weights[1].toFixed(1);
+      document.getElementById('weight-rating').value = weights[2].toFixed(1);
+
+      document.getElementById('weight-equipment-val').innerText = Math.round(weights[0]) + '%';
+      document.getElementById('weight-pricing-val').innerText = Math.round(weights[1]) + '%';
+      document.getElementById('weight-rating-val').innerText = Math.round(weights[2]) + '%';
+
+      triggerAllRenders();
+    };
+
+    // Bind slider inputs
+    document.getElementById('weight-equipment').addEventListener('input', (e) => handleWeightSliderChange(0, parseFloat(e.target.value)));
+    document.getElementById('weight-pricing').addEventListener('input', (e) => handleWeightSliderChange(1, parseFloat(e.target.value)));
+    document.getElementById('weight-rating').addEventListener('input', (e) => handleWeightSliderChange(2, parseFloat(e.target.value)));
+
+    // SEARCH & FILTER TRIGGERS
+    document.getElementById('photo-search').addEventListener('input', (e) => {
+      state.filters.photoSearch = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('photo-filter-status').addEventListener('change', (e) => {
+      state.filters.photoStatus = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('vendor-search').addEventListener('input', (e) => {
+      state.filters.vendorSearch = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('vendor-filter-category').addEventListener('change', (e) => {
+      state.filters.vendorCategory = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('vendor-filter-status').addEventListener('change', (e) => {
+      state.filters.vendorStatus = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('expense-search').addEventListener('input', (e) => {
+      state.filters.expenseSearch = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('expense-filter-category').addEventListener('change', (e) => {
+      state.filters.expenseCategory = e.target.value;
+      triggerAllRenders();
+    });
+    document.getElementById('expense-filter-status').addEventListener('change', (e) => {
+      state.filters.expenseStatus = e.target.value;
+      triggerAllRenders();
+    });
+
+    // Custom Destructive Confirm dialogues
+    let activeConfirmAction = null;
+    window.triggerCustomConfirm = function (title, msg, onConfirm) {
+      document.getElementById('confirm-title').innerText = title;
+      document.getElementById('confirm-message').innerText = msg;
+
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+      activeConfirmAction = onConfirm;
+    };
+
+    function closeConfirmModal() {
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.add('scale-95');
+      activeConfirmAction = null;
+    }
+
+    document.getElementById('confirm-cancel-btn').addEventListener('click', closeConfirmModal);
+    document.getElementById('confirm-ok-btn').addEventListener('click', () => {
+      if (activeConfirmAction) activeConfirmAction();
+      closeConfirmModal();
+    });
+
+    // PHOTOGRAPHER CRUD ACTION TRIGGERS
+    window.openPhotographerModal = function (id = '') {
+      if (!requireGoogleAuth()) return;
+      const modal = document.getElementById('modal-photographer');
+      const form = document.getElementById('form-photographer');
+      form.reset();
+
+      if (id) {
+        document.getElementById('modal-photo-title').innerText = 'Edit Photographer';
+        const p = state.photographers.find(x => x.id === id);
+        if (p) {
+          document.getElementById('photo-id').value = p.id;
+          document.getElementById('photo-studio').value = p.studio;
+          document.getElementById('photo-lead').value = p.leadName;
+          document.getElementById('photo-status').value = p.status;
+          document.getElementById('photo-location').value = p.location || '';
+          document.getElementById('photo-instagram').value = p.instagram || '';
+          document.getElementById('photo-pricing').value = p.totalPricing;
+          document.getElementById('photo-advance').value = p.advancePaid || 0;
+          document.getElementById('photo-rating').value = p.rating;
+          document.getElementById('photo-team').value = p.teamSize || 1;
+          document.getElementById('photo-album').value = p.albumIncluded || 'No';
+          document.getElementById('photo-equipment').value = p.equipment || '';
+          document.getElementById('photo-deliverables').value = p.deliverables || '';
+          document.getElementById('photo-remarks').value = p.remarks || '';
+        }
+      } else {
+        document.getElementById('modal-photo-title').innerText = 'Add Photographer';
+        document.getElementById('photo-id').value = '';
+      }
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+    };
+
+    window.closePhotographerModal = function () {
+      const modal = document.getElementById('modal-photographer');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.add('scale-95');
+    };
+
+    window.savePhotographer = async function (e) {
+      e.preventDefault();
+      if (!requireGoogleAuth()) return;
+      const id = document.getElementById('photo-id').value;
+      const record = {
+        studio: document.getElementById('photo-studio').value,
+        leadName: document.getElementById('photo-lead').value,
+        status: document.getElementById('photo-status').value,
+        location: document.getElementById('photo-location').value,
+        instagram: document.getElementById('photo-instagram').value,
+        totalPricing: parseFloat(document.getElementById('photo-pricing').value),
+        advancePaid: parseInt(document.getElementById('photo-advance').value) || 0,
+        rating: parseFloat(document.getElementById('photo-rating').value),
+        teamSize: parseInt(document.getElementById('photo-team').value) || 1,
+        albumIncluded: document.getElementById('photo-album').value,
+        equipment: document.getElementById('photo-equipment').value,
+        deliverables: document.getElementById('photo-deliverables').value,
+        remarks: document.getElementById('photo-remarks').value
+      };
+
+      try {
+        await dbHelper.saveRecord('photographers', id, record);
+        showToast(id ? 'Photographer details updated successfully.' : 'New photographer added to grid.', 'success');
+        closePhotographerModal();
+      } catch (err) {
+        showToast('Failed to save photographer.', 'error');
+      }
+    };
+
+    window.editPhotographer = function (id) {
+      openPhotographerModal(id);
+    };
+
+    window.deletePhotographerDialog = function (id) {
+      if (!requireGoogleAuth()) return;
+      triggerCustomConfirm(
+        'Delete Photographer?',
+        'Are you sure you want to remove this photographer candidate from evaluation?',
+        async () => {
+          try {
+            await dbHelper.deleteRecord('photographers', id);
+            showToast('Photographer entry deleted.', 'success');
+          } catch (e) {
+            showToast('Failed to delete photographer.', 'error');
+          }
+        }
+      );
+    };
+
+    window.setPhotographerLayout = function (layout) {
+      state.photographerLayout = layout;
+      triggerAllRenders();
+    };
+
+    // OTHER VENDOR CRUD ACTIONS
+    window.openVendorModal = function (id = '') {
+      if (!requireGoogleAuth()) return;
+      const modal = document.getElementById('modal-vendor');
+      const form = document.getElementById('form-vendor');
+      form.reset();
+
+      if (id) {
+        document.getElementById('modal-vendor-title').innerText = 'Edit Vendor Candidate';
+        const v = state.vendors.find(x => x.id === id);
+        if (v) {
+          document.getElementById('vendor-id').value = v.id;
+          document.getElementById('vendor-category').value = v.category;
+          document.getElementById('vendor-studio').value = v.studio;
+          document.getElementById('vendor-lead').value = v.leadName;
+          document.getElementById('vendor-status').value = v.status;
+          document.getElementById('vendor-location').value = v.location || '';
+          document.getElementById('vendor-instagram').value = v.instagram || '';
+          document.getElementById('vendor-pricing').value = v.totalPricing;
+          document.getElementById('vendor-advance').value = v.advancePaid || 0;
+          document.getElementById('vendor-rating').value = v.rating;
+          document.getElementById('vendor-team').value = v.teamSize || 1;
+          document.getElementById('vendor-equipment').value = v.equipment || '';
+          document.getElementById('vendor-deliverables').value = v.deliverables || '';
+          document.getElementById('vendor-remarks').value = v.remarks || '';
+        }
+      } else {
+        document.getElementById('modal-vendor-title').innerText = 'Add Vendor Candidate';
+        document.getElementById('vendor-id').value = '';
+      }
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+    };
+
+    window.closeVendorModal = function () {
+      const modal = document.getElementById('modal-vendor');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.add('scale-95');
+    };
+
+    window.saveVendor = async function (e) {
+      e.preventDefault();
+      if (!requireGoogleAuth()) return;
+      const id = document.getElementById('vendor-id').value;
+      const record = {
+        category: document.getElementById('vendor-category').value,
+        studio: document.getElementById('vendor-studio').value,
+        leadName: document.getElementById('vendor-lead').value,
+        status: document.getElementById('vendor-status').value,
+        location: document.getElementById('vendor-location').value,
+        instagram: document.getElementById('vendor-instagram').value,
+        totalPricing: parseFloat(document.getElementById('vendor-pricing').value) || 0,
+        advancePaid: parseFloat(document.getElementById('vendor-advance').value) || 0,
+        rating: parseFloat(document.getElementById('vendor-rating').value) || 5,
+        teamSize: parseInt(document.getElementById('vendor-team').value) || 1,
+        equipment: document.getElementById('vendor-equipment').value,
+        deliverables: document.getElementById('vendor-deliverables').value,
+        remarks: document.getElementById('vendor-remarks').value
+      };
+
+      try {
+        await dbHelper.saveRecord('vendors', id, record);
+        showToast(id ? 'Vendor details updated successfully.' : 'New vendor candidate added.', 'success');
+        closeVendorModal();
+      } catch (err) {
+        showToast('Failed to save vendor.', 'error');
+      }
+    };
+
+    window.editVendor = function (id) {
+      openVendorModal(id);
+    };
+
+    window.deleteVendorDialog = function (id) {
+      if (!requireGoogleAuth()) return;
+      triggerCustomConfirm(
+        'Delete Vendor?',
+        'Are you sure you want to remove this vendor candidate from evaluation?',
+        async () => {
+          try {
+            await dbHelper.deleteRecord('vendors', id);
+            showToast('Vendor candidate deleted.', 'success');
+          } catch (e) {
+            showToast('Failed to delete vendor.', 'error');
+          }
+        }
+      );
+    };
+
+    // ==========================================
+    // EXPENSES RENDERER & ACTIONS
+    // ==========================================
+    function renderExpenses() {
+      const tbody = document.getElementById("expense-table-body");
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      let list = state.expenses;
+      const budget = state.expenseBudget || 500000;
+
+      // Filter & Search client-side
+      const query = state.filters.expenseSearch.toLowerCase();
+      const catFilter = state.filters.expenseCategory;
+      const statusFilter = state.filters.expenseStatus;
+
+      list = list.filter(exp => {
+        const matchesQuery = exp.title.toLowerCase().includes(query) || (exp.vendor && exp.vendor.toLowerCase().includes(query)) || (exp.remarks && exp.remarks.toLowerCase().includes(query));
+        const matchesCat = catFilter === 'All' || exp.category === catFilter;
+        const matchesStatus = statusFilter === 'All' || exp.status === statusFilter;
+        return matchesQuery && matchesCat && matchesStatus;
       });
 
-      // PHOTOGRAPHER CRUD ACTION TRIGGERS
-      window.openPhotographerModal = function (id = '') {
-        if (!requireGoogleAuth()) return;
-        const modal = document.getElementById('modal-photographer');
-        const form = document.getElementById('form-photographer');
-        form.reset();
+      // Stats calculations
+      const totalSpent = state.expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+      const paidSpent = state.expenses.filter(exp => exp.status === 'Paid').reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+      const pendingSpent = state.expenses.filter(exp => exp.status === 'Pending').reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+      const remainingBalance = budget - totalSpent;
 
-        if (id) {
-          document.getElementById('modal-photo-title').innerText = 'Edit Photographer';
-          const p = state.photographers.find(x => x.id === id);
-          if (p) {
-            document.getElementById('photo-id').value = p.id;
-            document.getElementById('photo-studio').value = p.studio;
-            document.getElementById('photo-lead').value = p.leadName;
-            document.getElementById('photo-status').value = p.status;
-            document.getElementById('photo-location').value = p.location || '';
-            document.getElementById('photo-instagram').value = p.instagram || '';
-            document.getElementById('photo-pricing').value = p.totalPricing;
-            document.getElementById('photo-advance').value = p.advancePaid || 0;
-            document.getElementById('photo-rating').value = p.rating;
-            document.getElementById('photo-team').value = p.teamSize || 1;
-            document.getElementById('photo-album').value = p.albumIncluded || 'No';
-            document.getElementById('photo-equipment').value = p.equipment || '';
-            document.getElementById('photo-deliverables').value = p.deliverables || '';
-            document.getElementById('photo-remarks').value = p.remarks || '';
-          }
-        } else {
-          document.getElementById('modal-photo-title').innerText = 'Add Photographer';
-          document.getElementById('photo-id').value = '';
-        }
+      const paidCount = state.expenses.filter(exp => exp.status === 'Paid').length;
+      const pendingCount = state.expenses.filter(exp => exp.status === 'Pending').length;
 
-        modal.classList.remove('opacity-0', 'pointer-events-none');
-        modal.querySelector('div').classList.remove('scale-95');
-      };
+      // Update stat card UI elements
+      document.getElementById("expense-stat-budget").innerText = `₹${budget.toLocaleString('en-IN')}`;
+      document.getElementById("expense-stat-spent").innerText = `₹${totalSpent.toLocaleString('en-IN')}`;
 
-      window.closePhotographerModal = function () {
-        const modal = document.getElementById('modal-photographer');
-        modal.classList.add('opacity-0', 'pointer-events-none');
-        modal.querySelector('div').classList.add('scale-95');
-      };
+      const spentPercentage = budget > 0 ? (totalSpent / budget) * 100 : 0;
+      document.getElementById("spent-percentage").innerText = `${Math.round(spentPercentage)}% of budget used`;
 
-      window.savePhotographer = async function (e) {
-        e.preventDefault();
-        if (!requireGoogleAuth()) return;
-        const id = document.getElementById('photo-id').value;
-        const record = {
-          studio: document.getElementById('photo-studio').value,
-          leadName: document.getElementById('photo-lead').value,
-          status: document.getElementById('photo-status').value,
-          location: document.getElementById('photo-location').value,
-          instagram: document.getElementById('photo-instagram').value,
-          totalPricing: parseFloat(document.getElementById('photo-pricing').value),
-          advancePaid: parseInt(document.getElementById('photo-advance').value) || 0,
-          rating: parseFloat(document.getElementById('photo-rating').value),
-          teamSize: parseInt(document.getElementById('photo-team').value) || 1,
-          albumIncluded: document.getElementById('photo-album').value,
-          equipment: document.getElementById('photo-equipment').value,
-          deliverables: document.getElementById('photo-deliverables').value,
-          remarks: document.getElementById('photo-remarks').value
-        };
+      document.getElementById("expense-stat-remaining").innerText = `₹${remainingBalance.toLocaleString('en-IN')}`;
+      const statusEl = document.getElementById("remaining-status");
+      if (remainingBalance < 0) {
+        statusEl.innerText = "Over Budget ⚠️";
+        statusEl.className = "text-[10px] text-rose-600 mt-2 font-mono font-bold animate-pulse";
+      } else {
+        statusEl.innerText = "Under Budget";
+        statusEl.className = "text-[10px] text-emerald-600 mt-2 font-mono";
+      }
 
-        try {
-          await dbHelper.saveRecord('photographers', id, record);
-          showToast(id ? 'Photographer details updated successfully.' : 'New photographer added to grid.', 'success');
-          closePhotographerModal();
-        } catch (err) {
-          showToast('Failed to save photographer.', 'error');
-        }
-      };
+      document.getElementById("expense-stat-paid").innerText = `₹${paidSpent.toLocaleString('en-IN')}`;
+      document.getElementById("paid-count").innerText = `${paidCount} transaction${paidCount === 1 ? '' : 's'} settled`;
 
-      window.editPhotographer = function (id) {
-        openPhotographerModal(id);
-      };
+      document.getElementById("expense-stat-pending").innerText = `₹${pendingSpent.toLocaleString('en-IN')}`;
+      document.getElementById("pending-count").innerText = `${pendingCount} transaction${pendingCount === 1 ? '' : 's'} remaining`;
 
-      window.deletePhotographerDialog = function (id) {
-        if (!requireGoogleAuth()) return;
-        triggerCustomConfirm(
-          'Delete Photographer?',
-          'Are you sure you want to remove this photographer candidate from evaluation?',
-          async () => {
-            try {
-              await dbHelper.deleteRecord('photographers', id);
-              showToast('Photographer entry deleted.', 'success');
-            } catch (e) {
-              showToast('Failed to delete photographer.', 'error');
-            }
-          }
-        );
-      };
-
-      window.setPhotographerLayout = function (layout) {
-        state.photographerLayout = layout;
-        triggerAllRenders();
-      };
-
-      // OTHER VENDOR CRUD ACTIONS
-      window.openVendorModal = function (id = '') {
-        if (!requireGoogleAuth()) return;
-        const modal = document.getElementById('modal-vendor');
-        const form = document.getElementById('form-vendor');
-        form.reset();
-
-        if (id) {
-          document.getElementById('modal-vendor-title').innerText = 'Edit Vendor Candidate';
-          const v = state.vendors.find(x => x.id === id);
-          if (v) {
-            document.getElementById('vendor-id').value = v.id;
-            document.getElementById('vendor-category').value = v.category;
-            document.getElementById('vendor-studio').value = v.studio;
-            document.getElementById('vendor-lead').value = v.leadName;
-            document.getElementById('vendor-status').value = v.status;
-            document.getElementById('vendor-location').value = v.location || '';
-            document.getElementById('vendor-instagram').value = v.instagram || '';
-            document.getElementById('vendor-pricing').value = v.totalPricing;
-            document.getElementById('vendor-advance').value = v.advancePaid || 0;
-            document.getElementById('vendor-rating').value = v.rating;
-            document.getElementById('vendor-team').value = v.teamSize || 1;
-            document.getElementById('vendor-equipment').value = v.equipment || '';
-            document.getElementById('vendor-deliverables').value = v.deliverables || '';
-            document.getElementById('vendor-remarks').value = v.remarks || '';
-          }
-        } else {
-          document.getElementById('modal-vendor-title').innerText = 'Add Vendor Candidate';
-          document.getElementById('vendor-id').value = '';
-        }
-
-        modal.classList.remove('opacity-0', 'pointer-events-none');
-        modal.querySelector('div').classList.remove('scale-95');
-      };
-
-      window.closeVendorModal = function () {
-        const modal = document.getElementById('modal-vendor');
-        modal.classList.add('opacity-0', 'pointer-events-none');
-        modal.querySelector('div').classList.add('scale-95');
-      };
-
-      window.saveVendor = async function (e) {
-        e.preventDefault();
-        if (!requireGoogleAuth()) return;
-        const id = document.getElementById('vendor-id').value;
-        const record = {
-          category: document.getElementById('vendor-category').value,
-          studio: document.getElementById('vendor-studio').value,
-          leadName: document.getElementById('vendor-lead').value,
-          status: document.getElementById('vendor-status').value,
-          location: document.getElementById('vendor-location').value,
-          instagram: document.getElementById('vendor-instagram').value,
-          totalPricing: parseFloat(document.getElementById('vendor-pricing').value) || 0,
-          advancePaid: parseFloat(document.getElementById('vendor-advance').value) || 0,
-          rating: parseFloat(document.getElementById('vendor-rating').value) || 5,
-          teamSize: parseInt(document.getElementById('vendor-team').value) || 1,
-          equipment: document.getElementById('vendor-equipment').value,
-          deliverables: document.getElementById('vendor-deliverables').value,
-          remarks: document.getElementById('vendor-remarks').value
-        };
-
-        try {
-          await dbHelper.saveRecord('vendors', id, record);
-          showToast(id ? 'Vendor details updated successfully.' : 'New vendor candidate added.', 'success');
-          closeVendorModal();
-        } catch (err) {
-          showToast('Failed to save vendor.', 'error');
-        }
-      };
-
-      window.editVendor = function (id) {
-        openVendorModal(id);
-      };
-
-      window.deleteVendorDialog = function (id) {
-        if (!requireGoogleAuth()) return;
-        triggerCustomConfirm(
-          'Delete Vendor?',
-          'Are you sure you want to remove this vendor candidate from evaluation?',
-          async () => {
-            try {
-              await dbHelper.deleteRecord('vendors', id);
-              showToast('Vendor candidate deleted.', 'success');
-            } catch (e) {
-              showToast('Failed to delete vendor.', 'error');
-            }
-          }
-        );
-      };
-
-      // ==========================================
-      // EXPENSES RENDERER & ACTIONS
-      // ==========================================
-      function renderExpenses() {
-        const tbody = document.getElementById("expense-table-body");
-        if (!tbody) return;
-        tbody.innerHTML = '';
-
-        let list = state.expenses;
-        const budget = state.expenseBudget || 500000;
-
-        // Filter & Search client-side
-        const query = state.filters.expenseSearch.toLowerCase();
-        const catFilter = state.filters.expenseCategory;
-        const statusFilter = state.filters.expenseStatus;
-
-        list = list.filter(exp => {
-          const matchesQuery = exp.title.toLowerCase().includes(query) || (exp.vendor && exp.vendor.toLowerCase().includes(query)) || (exp.remarks && exp.remarks.toLowerCase().includes(query));
-          const matchesCat = catFilter === 'All' || exp.category === catFilter;
-          const matchesStatus = statusFilter === 'All' || exp.status === statusFilter;
-          return matchesQuery && matchesCat && matchesStatus;
-        });
-
-        // Stats calculations
-        const totalSpent = state.expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
-        const paidSpent = state.expenses.filter(exp => exp.status === 'Paid').reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
-        const pendingSpent = state.expenses.filter(exp => exp.status === 'Pending').reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
-        const remainingBalance = budget - totalSpent;
-
-        const paidCount = state.expenses.filter(exp => exp.status === 'Paid').length;
-        const pendingCount = state.expenses.filter(exp => exp.status === 'Pending').length;
-
-        // Update stat card UI elements
-        document.getElementById("expense-stat-budget").innerText = `₹${budget.toLocaleString('en-IN')}`;
-        document.getElementById("expense-stat-spent").innerText = `₹${totalSpent.toLocaleString('en-IN')}`;
-
-        const spentPercentage = budget > 0 ? (totalSpent / budget) * 100 : 0;
-        document.getElementById("spent-percentage").innerText = `${Math.round(spentPercentage)}% of budget used`;
-
-        document.getElementById("expense-stat-remaining").innerText = `₹${remainingBalance.toLocaleString('en-IN')}`;
-        const statusEl = document.getElementById("remaining-status");
-        if (remainingBalance < 0) {
-          statusEl.innerText = "Over Budget ⚠️";
-          statusEl.className = "text-[10px] text-rose-600 mt-2 font-mono font-bold animate-pulse";
-        } else {
-          statusEl.innerText = "Under Budget";
-          statusEl.className = "text-[10px] text-emerald-600 mt-2 font-mono";
-        }
-
-        document.getElementById("expense-stat-paid").innerText = `₹${paidSpent.toLocaleString('en-IN')}`;
-        document.getElementById("paid-count").innerText = `${paidCount} transaction${paidCount === 1 ? '' : 's'} settled`;
-
-        document.getElementById("expense-stat-pending").innerText = `₹${pendingSpent.toLocaleString('en-IN')}`;
-        document.getElementById("pending-count").innerText = `${pendingCount} transaction${pendingCount === 1 ? '' : 's'} remaining`;
-
-        if (list.length === 0) {
-          tbody.innerHTML = `
+      if (list.length === 0) {
+        tbody.innerHTML = `
           <tr>
             <td colspan="7" class="py-12 text-center text-slate-500 font-medium">
               <i data-lucide="indian-rupee" class="w-8 h-8 mx-auto mb-2 text-slate-600"></i>
@@ -3345,19 +3348,19 @@
             </td>
           </tr>
         `;
-          return;
-        }
+        return;
+      }
 
-        list.forEach(exp => {
-          const tr = document.createElement('tr');
-          tr.className = 'hover:bg-slate-50/80 transition border-b border-slate-100';
+      list.forEach(exp => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition border-b border-slate-100';
 
-          const statusBadges = {
-            'Paid': 'bg-emerald-50 text-emerald-600 border-emerald-250',
-            'Pending': 'bg-amber-50 text-amber-600 border-amber-250'
-          };
+        const statusBadges = {
+          'Paid': 'bg-emerald-50 text-emerald-600 border-emerald-250',
+          'Pending': 'bg-amber-50 text-amber-600 border-amber-250'
+        };
 
-          tr.innerHTML = `
+        tr.innerHTML = `
           <td class="py-4 px-6 font-semibold text-slate-800">${exp.title}</td>
           <td class="py-4 px-6 font-mono text-xs text-indigo-650 font-semibold">${exp.category}</td>
           <td class="py-4 px-6 text-center">
@@ -3388,164 +3391,164 @@
             ` : '—'}
           </td>
         `;
-          tbody.appendChild(tr);
-        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    // BUDGET ACTIONS
+    window.toggleEditBudget = function () {
+      if (!requireGoogleAuth()) return;
+      const budgetView = document.getElementById("budget-view");
+      const budgetEdit = document.getElementById("budget-edit-input-container");
+      const btn = document.getElementById("btn-edit-budget");
+
+      if (budgetEdit.classList.contains("hidden")) {
+        budgetEdit.classList.remove("hidden");
+        budgetView.classList.add("hidden");
+        document.getElementById("input-expense-budget").value = state.expenseBudget;
+        btn.innerHTML = `<i data-lucide="x" class="w-3 h-3"></i><span>Cancel</span>`;
+      } else {
+        budgetEdit.classList.add("hidden");
+        budgetView.classList.remove("hidden");
+        btn.innerHTML = `<i data-lucide="edit-2" class="w-3 h-3"></i><span>Edit</span>`;
       }
+      lucide.createIcons();
+    };
 
-      // BUDGET ACTIONS
-      window.toggleEditBudget = function () {
-        if (!requireGoogleAuth()) return;
-        const budgetView = document.getElementById("budget-view");
-        const budgetEdit = document.getElementById("budget-edit-input-container");
-        const btn = document.getElementById("btn-edit-budget");
+    window.saveBudget = async function () {
+      if (!requireGoogleAuth()) return;
+      const val = parseFloat(document.getElementById("input-expense-budget").value);
+      if (isNaN(val) || val < 0) {
+        showToast("Please enter a valid budget amount.", "error");
+        return;
+      }
+      try {
+        await dbHelper.saveBudget(val);
+        showToast("Expense budget updated.", "success");
+        toggleEditBudget();
+      } catch (e) {
+        showToast("Failed to save budget.", "error");
+      }
+    };
 
-        if (budgetEdit.classList.contains("hidden")) {
-          budgetEdit.classList.remove("hidden");
-          budgetView.classList.add("hidden");
-          document.getElementById("input-expense-budget").value = state.expenseBudget;
-          btn.innerHTML = `<i data-lucide="x" class="w-3 h-3"></i><span>Cancel</span>`;
-        } else {
-          budgetEdit.classList.add("hidden");
-          budgetView.classList.remove("hidden");
-          btn.innerHTML = `<i data-lucide="edit-2" class="w-3 h-3"></i><span>Edit</span>`;
-        }
-        lucide.createIcons();
-      };
+    // EXPENSE ACTIONS
+    window.updateExpenseStatus = async function (id, statusVal) {
+      if (!requireGoogleAuth()) return;
+      const exp = state.expenses.find(x => x.id === id);
+      if (!exp) return;
+      try {
+        await dbHelper.saveRecord('expenses', id, { ...exp, status: statusVal });
+        showToast(`Transaction set to ${statusVal}.`, 'success');
+      } catch (e) {
+        showToast('Failed to update status.', 'error');
+      }
+    };
 
-      window.saveBudget = async function () {
-        if (!requireGoogleAuth()) return;
-        const val = parseFloat(document.getElementById("input-expense-budget").value);
-        if (isNaN(val) || val < 0) {
-          showToast("Please enter a valid budget amount.", "error");
-          return;
-        }
-        try {
-          await dbHelper.saveBudget(val);
-          showToast("Expense budget updated.", "success");
-          toggleEditBudget();
-        } catch (e) {
-          showToast("Failed to save budget.", "error");
-        }
-      };
+    window.openExpenseModal = function (id = '') {
+      if (!requireGoogleAuth()) return;
+      const modal = document.getElementById('modal-expense');
+      const form = document.getElementById('form-expense');
+      form.reset();
 
-      // EXPENSE ACTIONS
-      window.updateExpenseStatus = async function (id, statusVal) {
-        if (!requireGoogleAuth()) return;
+      if (id) {
+        document.getElementById('modal-expense-title').innerText = 'Edit Expense Record';
         const exp = state.expenses.find(x => x.id === id);
-        if (!exp) return;
-        try {
-          await dbHelper.saveRecord('expenses', id, { ...exp, status: statusVal });
-          showToast(`Transaction set to ${statusVal}.`, 'success');
-        } catch (e) {
-          showToast('Failed to update status.', 'error');
+        if (exp) {
+          document.getElementById('expense-id').value = exp.id;
+          document.getElementById('expense-title').value = exp.title;
+          document.getElementById('expense-category').value = exp.category;
+          document.getElementById('expense-status').value = exp.status;
+          document.getElementById('expense-amount').value = exp.amount;
+          document.getElementById('expense-vendor').value = exp.vendor || '';
+          document.getElementById('expense-remarks').value = exp.remarks || '';
         }
-      };
-
-      window.openExpenseModal = function (id = '') {
-        if (!requireGoogleAuth()) return;
-        const modal = document.getElementById('modal-expense');
-        const form = document.getElementById('form-expense');
-        form.reset();
-
-        if (id) {
-          document.getElementById('modal-expense-title').innerText = 'Edit Expense Record';
-          const exp = state.expenses.find(x => x.id === id);
-          if (exp) {
-            document.getElementById('expense-id').value = exp.id;
-            document.getElementById('expense-title').value = exp.title;
-            document.getElementById('expense-category').value = exp.category;
-            document.getElementById('expense-status').value = exp.status;
-            document.getElementById('expense-amount').value = exp.amount;
-            document.getElementById('expense-vendor').value = exp.vendor || '';
-            document.getElementById('expense-remarks').value = exp.remarks || '';
-          }
-        } else {
-          document.getElementById('modal-expense-title').innerText = 'Record Expense';
-          document.getElementById('expense-id').value = '';
-        }
-
-        modal.classList.remove('opacity-0', 'pointer-events-none');
-        modal.querySelector('div').classList.remove('scale-95');
-      };
-
-      window.closeExpenseModal = function () {
-        const modal = document.getElementById('modal-expense');
-        modal.classList.add('opacity-0', 'pointer-events-none');
-        modal.querySelector('div').classList.add('scale-95');
-      };
-
-      window.saveExpense = async function (e) {
-        e.preventDefault();
-        if (!requireGoogleAuth()) return;
-        const id = document.getElementById('expense-id').value;
-        const record = {
-          title: document.getElementById('expense-title').value,
-          category: document.getElementById('expense-category').value,
-          status: document.getElementById('expense-status').value,
-          amount: parseFloat(document.getElementById('expense-amount').value) || 0,
-          vendor: document.getElementById('expense-vendor').value,
-          remarks: document.getElementById('expense-remarks').value
-        };
-
-        try {
-          await dbHelper.saveRecord('expenses', id, record);
-          showToast(id ? 'Expense details updated.' : 'New transaction recorded.', 'success');
-          closeExpenseModal();
-        } catch (err) {
-          showToast('Failed to save expense details.', 'error');
-        }
-      };
-
-      window.editExpense = function (id) {
-        openExpenseModal(id);
-      };
-
-      window.deleteExpenseDialog = function (id) {
-        if (!requireGoogleAuth()) return;
-        triggerCustomConfirm(
-          'Delete Transaction?',
-          'Are you sure you want to delete this expense record?',
-          async () => {
-            try {
-              await dbHelper.deleteRecord('expenses', id);
-              showToast('Expense record deleted.', 'success');
-            } catch (e) {
-              showToast('Failed to delete expense record.', 'error');
-            }
-          }
-        );
-      };
-
-      // INSTANT LINK SHARING PANEL
-      window.copyWorkspaceLink = function () {
-        const dummy = document.createElement('input');
-        dummy.value = window.location.href;
-        document.body.appendChild(dummy);
-        dummy.select();
-
-        try {
-          const success = document.execCommand('copy');
-          if (success) {
-            showToast("Workspace Link Copied! Send this to your family on WhatsApp.", "success");
-          } else {
-            showToast("Failed to copy link.", "error");
-          }
-        } catch (err) {
-          showToast("Error copying link.", "error");
-        }
-
-        document.body.removeChild(dummy);
-      };
-
-      // ==========================================
-      // INITIALIZATION RUN
-      // ==========================================
-      async function run() {
-        dbHelper = new CollaborativeDB();
-        await dbHelper.initialize();
+      } else {
+        document.getElementById('modal-expense-title').innerText = 'Record Expense';
+        document.getElementById('expense-id').value = '';
       }
 
-      run();
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+    };
+
+    window.closeExpenseModal = function () {
+      const modal = document.getElementById('modal-expense');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.add('scale-95');
+    };
+
+    window.saveExpense = async function (e) {
+      e.preventDefault();
+      if (!requireGoogleAuth()) return;
+      const id = document.getElementById('expense-id').value;
+      const record = {
+        title: document.getElementById('expense-title').value,
+        category: document.getElementById('expense-category').value,
+        status: document.getElementById('expense-status').value,
+        amount: parseFloat(document.getElementById('expense-amount').value) || 0,
+        vendor: document.getElementById('expense-vendor').value,
+        remarks: document.getElementById('expense-remarks').value
+      };
+
+      try {
+        await dbHelper.saveRecord('expenses', id, record);
+        showToast(id ? 'Expense details updated.' : 'New transaction recorded.', 'success');
+        closeExpenseModal();
+      } catch (err) {
+        showToast('Failed to save expense details.', 'error');
+      }
+    };
+
+    window.editExpense = function (id) {
+      openExpenseModal(id);
+    };
+
+    window.deleteExpenseDialog = function (id) {
+      if (!requireGoogleAuth()) return;
+      triggerCustomConfirm(
+        'Delete Transaction?',
+        'Are you sure you want to delete this expense record?',
+        async () => {
+          try {
+            await dbHelper.deleteRecord('expenses', id);
+            showToast('Expense record deleted.', 'success');
+          } catch (e) {
+            showToast('Failed to delete expense record.', 'error');
+          }
+        }
+      );
+    };
+
+    // INSTANT LINK SHARING PANEL
+    window.copyWorkspaceLink = function () {
+      const dummy = document.createElement('input');
+      dummy.value = window.location.href;
+      document.body.appendChild(dummy);
+      dummy.select();
+
+      try {
+        const success = document.execCommand('copy');
+        if (success) {
+          showToast("Workspace Link Copied! Send this to your family on WhatsApp.", "success");
+        } else {
+          showToast("Failed to copy link.", "error");
+        }
+      } catch (err) {
+        showToast("Error copying link.", "error");
+      }
+
+      document.body.removeChild(dummy);
+    };
+
+    // ==========================================
+    // INITIALIZATION RUN
+    // ==========================================
+    async function run() {
+      dbHelper = new CollaborativeDB();
+      await dbHelper.initialize();
+    }
+
+    run();
   </script>
 </body>
 

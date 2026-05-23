@@ -13,24 +13,34 @@
       theme: {
         extend: {
           colors: {
+            gold: {
+              50:  '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#e5b800',
+              500: '#cc9900',
+              600: '#b8860b',
+              650: '#a07800',
+              700: '#8a6a00',
+              800: '#6b5200',
+              900: '#4a3800',
+            },
             copper: {
-              DEFAULT: '#4f46e5',
-              light: '#6366f1',
-              dark: '#3730a3',
+              DEFAULT: '#cc9900',
+              light: '#b8860b',
+              dark: '#a07800',
             },
             terracotta: {
-              DEFAULT: '#4f46e5',
-              dark: '#3730a3',
-              royal: '#1e1b4b',
+              DEFAULT: '#cc9900',
+              dark: '#a07800',
+              royal: '#7a5c00',
             },
             slate: {
               950: '#f8fafc',
               650: '#3d4b5f',
               750: '#293548',
               850: '#161f30',
-            },
-            indigo: {
-              650: '#493fdd',
             },
             violet: {
               650: '#7431e3',
@@ -89,14 +99,14 @@
       height: 18px;
       width: 18px;
       border-radius: 50%;
-      background: #4f46e5;
+      background: #cc9900;
       cursor: pointer;
-      box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
+      box-shadow: 0 0 10px rgba(204, 153, 0, 0.2);
       transition: background-color 0.15s ease-in-out;
     }
 
     input[type=range]::-webkit-slider-thumb:hover {
-      background: #6366f1;
+      background: #b8860b;
     }
 
     .pulse-glow {
@@ -105,20 +115,20 @@
 
     @keyframes pulseGlow {
       0% {
-        box-shadow: 0 0 5px rgba(79, 70, 229, 0.1);
-        border-color: rgba(79, 70, 229, 0.15);
+        box-shadow: 0 0 5px rgba(204, 153, 0, 0.1);
+        border-color: rgba(204, 153, 0, 0.15);
       }
 
       100% {
-        box-shadow: 0 0 12px rgba(79, 70, 229, 0.3);
-        border-color: rgba(79, 70, 229, 0.4);
+        box-shadow: 0 0 12px rgba(204, 153, 0, 0.3);
+        border-color: rgba(204, 153, 0, 0.4);
       }
     }
 
     .tab-active {
-      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      background: linear-gradient(135deg, #cc9900 0%, #e0b020 100%);
       color: white;
-      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.25);
+      box-shadow: 0 4px 15px rgba(204, 153, 0, 0.25);
     }
   </style>
 </head>
@@ -126,14 +136,14 @@
 <body class="bg-slate-50/50 text-slate-700 min-h-screen font-sans antialiased pb-20">
 
   <!-- Decorative top glowing bar -->
-  <div class="h-1.5 w-full bg-gradient-to-r from-indigo-700 via-indigo-500 to-indigo-400"></div>
+  <div class="h-1.5 w-full bg-gradient-to-r from-gold-700 via-gold-500 to-gold-400"></div>
 
   <div id="app-container" class="hidden">
     <!-- Sticky Header -->
     <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-3 shadow-sm">
       <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-3">
-          <div class="p-2.5 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-sm text-white">
+          <div class="p-2.5 bg-gradient-to-br from-gold-500 to-gold-600 rounded-xl shadow-sm text-white">
             <i data-lucide="gem" class="w-6 h-6"></i>
           </div>
           <div>
@@ -157,7 +167,7 @@
 
           <!-- Google Auth Button (shown when logged out) -->
           <button id="btn-google-login" onclick="handleGoogleSignIn()"
-            class="hidden items-center gap-2 px-4 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-indigo-300 text-slate-700 font-medium text-sm transition-all duration-200 shadow-sm">
+            class="hidden items-center gap-2 px-4 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-gold-300 text-slate-700 font-medium text-sm transition-all duration-200 shadow-sm">
             <svg class="w-4 h-4" viewBox="0 0 24 24">
               <path fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -184,7 +194,7 @@
 
           <!-- Share workspace link -->
           <button onclick="copyWorkspaceLink()"
-            class="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 hover:border-indigo-300 text-indigo-600 font-medium text-sm transition-all duration-200 shadow-sm">
+            class="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gold-50 hover:bg-gold-100 border border-gold-200 hover:border-gold-300 text-gold-600 font-medium text-sm transition-all duration-200 shadow-sm">
             <i data-lucide="share-2" class="w-4 h-4"></i>
             <span>Share</span>
           </button>
@@ -251,15 +261,15 @@
           <!-- Countdown Widget -->
           <div
             class="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[220px] shadow-sm">
-            <div class="absolute right-0 top-0 w-48 h-48 bg-indigo-50/30 rounded-full blur-3xl"></div>
+            <div class="absolute right-0 top-0 w-48 h-48 bg-gold-50/30 rounded-full blur-3xl"></div>
 
             <div class="flex items-center justify-between">
               <div>
-                <span class="text-xs font-mono text-indigo-600 uppercase tracking-widest font-bold">Countdown to
+                <span class="text-xs font-mono text-gold-600 uppercase tracking-widest font-bold">Countdown to
                   Ceremony</span>
                 <h3 class="text-lg font-semibold text-slate-850 mt-1">Engagement (Sakharpuda)</h3>
               </div>
-              <div class="p-2 bg-slate-50 border border-slate-100 text-indigo-650 rounded-xl">
+              <div class="p-2 bg-slate-50 border border-slate-100 text-gold-650 rounded-xl">
                 <i data-lucide="calendar-clock" class="w-5 h-5"></i>
               </div>
             </div>
@@ -288,16 +298,16 @@
 
             <div class="flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-3">
               <span>Target: June 23, 2026, 09:00 AM</span>
-              <span id="countdown-status" class="text-indigo-650 font-semibold">Awaiting Ceremony</span>
+              <span id="countdown-status" class="text-gold-650 font-semibold">Awaiting Ceremony</span>
             </div>
           </div>
 
           <!-- Manager Travel & Highlights Card -->
           <div class="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
             <div class="flex items-center justify-between mb-4">
-              <span class="text-xs font-mono text-indigo-600 uppercase tracking-widest font-bold">Event Manager
+              <span class="text-xs font-mono text-gold-600 uppercase tracking-widest font-bold">Event Manager
                 Status</span>
-              <div class="p-2 bg-slate-50 border border-slate-100 text-indigo-650 rounded-xl">
+              <div class="p-2 bg-slate-50 border border-slate-100 text-gold-650 rounded-xl">
                 <i data-lucide="plane" class="w-5 h-5"></i>
               </div>
             </div>
@@ -305,12 +315,12 @@
             <div class="space-y-4">
               <div class="flex items-center gap-3">
                 <div
-                  class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center border border-indigo-100 text-indigo-650">
+                  class="w-8 h-8 rounded-lg bg-gold-50 flex items-center justify-center border border-gold-100 text-gold-650">
                   <i data-lucide="globe-2" class="w-4.5 h-4.5"></i>
                 </div>
                 <div>
                   <h5 class="text-sm font-semibold text-slate-800">China Sourcing Trip</h5>
-                  <p class="text-xs text-indigo-600 font-mono">June 7 - June 17, 2026</p>
+                  <p class="text-xs text-gold-600 font-mono">June 7 - June 17, 2026</p>
                 </div>
               </div>
 
@@ -328,7 +338,7 @@
 
             <div class="mt-5 border-t border-slate-100 pt-3">
               <span class="text-xs text-slate-500">👑 Top Photographer:</span>
-              <div id="dash-photographer-rank1" class="text-sm font-bold text-indigo-650 mt-0.5">
+              <div id="dash-photographer-rank1" class="text-sm font-bold text-gold-650 mt-0.5">
                 Calculating...
               </div>
             </div>
@@ -343,12 +353,12 @@
           <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
             <div class="flex items-center justify-between mb-3">
               <h4 class="text-sm font-semibold text-slate-700">Procurement Items Sourced</h4>
-              <span id="sourcing-meter-text" class="text-xs font-mono font-bold text-indigo-600">0/0 Sourced</span>
+              <span id="sourcing-meter-text" class="text-xs font-mono font-bold text-gold-600">0/0 Sourced</span>
             </div>
             <!-- Progress Bar -->
             <div class="w-full bg-slate-100 rounded-full h-3.5 border border-slate-200 p-0.5 overflow-hidden">
               <div id="sourcing-meter-bar"
-                class="bg-gradient-to-r from-indigo-500 to-indigo-600 h-2 rounded-full transition-all duration-500"
+                class="bg-gradient-to-r from-gold-500 to-gold-600 h-2 rounded-full transition-all duration-500"
                 style="width: 0%"></div>
             </div>
             <p class="text-[11px] text-slate-500 mt-2 font-mono flex items-center gap-1">
@@ -398,7 +408,7 @@
         <!-- Chronology Milestone Panel -->
         <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
           <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <i data-lucide="history" class="w-5 h-5 text-indigo-650"></i>
+            <i data-lucide="history" class="w-5 h-5 text-gold-650"></i>
             <span>Sakharpuda Chronology & Planning Phases</span>
           </h3>
 
@@ -407,12 +417,12 @@
             <!-- Phase 1 Milestone -->
             <div class="relative">
               <div
-                class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-white border-2 border-indigo-500 flex items-center justify-center text-indigo-600 shadow-sm">
+                class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-white border-2 border-gold-500 flex items-center justify-center text-gold-600 shadow-sm">
                 <span class="text-[10px] font-bold">1</span>
               </div>
               <div>
                 <span
-                  class="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-full">Phase
+                  class="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-gold-50 text-gold-600 border border-gold-100 rounded-full">Phase
                   1: Active Planning</span>
                 <h4 class="text-base font-bold text-slate-800 mt-1">Pre-Travel Phase (Now - June 6)</h4>
                 <p class="text-sm text-slate-600 mt-1 leading-relaxed">
@@ -463,14 +473,14 @@
             <!-- Sakharpuda Ceremony -->
             <div class="relative">
               <div
-                class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-indigo-600 border-2 border-indigo-650 flex items-center justify-center text-white shadow-md">
+                class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-gold-600 border-2 border-gold-650 flex items-center justify-center text-white shadow-md">
                 <i data-lucide="award" class="w-3.5 h-3.5"></i>
               </div>
               <div>
                 <span
-                  class="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-indigo-50 text-indigo-650 border border-indigo-100 rounded-full">Ceremony
+                  class="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-gold-50 text-gold-650 border border-gold-100 rounded-full">Ceremony
                   Day</span>
-                <h4 class="text-base font-bold text-indigo-650 mt-1">Engagement (Sakharpuda) Ceremony</h4>
+                <h4 class="text-base font-bold text-gold-650 mt-1">Engagement (Sakharpuda) Ceremony</h4>
                 <p class="text-sm text-slate-700 mt-1 leading-relaxed font-semibold">
                   June 23, 2026, 09:00 AM. Traditional Marathi Sakharpuda ceremony begins!
                 </p>
@@ -490,7 +500,7 @@
         <!-- Weighing Algorithm Card -->
         <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
           <div class="flex items-center gap-2 mb-4">
-            <i data-lucide="sliders" class="w-5 h-5 text-indigo-650"></i>
+            <i data-lucide="sliders" class="w-5 h-5 text-gold-650"></i>
             <h3 class="text-lg font-bold text-slate-800">Photographer Rank Calculator</h3>
           </div>
           <p class="text-slate-500 text-xs leading-relaxed mb-6">
@@ -505,7 +515,7 @@
             <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
               <div class="flex justify-between items-center mb-2">
                 <span class="text-sm font-semibold text-slate-700">Equipment/Gear Quality</span>
-                <span id="weight-equipment-val" class="text-xs font-mono font-bold text-indigo-650">33.3%</span>
+                <span id="weight-equipment-val" class="text-xs font-mono font-bold text-gold-650">33.3%</span>
               </div>
               <input type="range" id="weight-equipment" min="0" max="100" step="0.1" value="33.3"
                 class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
@@ -515,7 +525,7 @@
             <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
               <div class="flex justify-between items-center mb-2">
                 <span class="text-sm font-semibold text-slate-700">Pricing Weight</span>
-                <span id="weight-pricing-val" class="text-xs font-mono font-bold text-indigo-650">33.3%</span>
+                <span id="weight-pricing-val" class="text-xs font-mono font-bold text-gold-650">33.3%</span>
               </div>
               <input type="range" id="weight-pricing" min="0" max="100" step="0.1" value="33.3"
                 class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
@@ -525,7 +535,7 @@
             <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
               <div class="flex justify-between items-center mb-2">
                 <span class="text-sm font-semibold text-slate-700">Subjective Rating</span>
-                <span id="weight-rating-val" class="text-xs font-mono font-bold text-indigo-650">33.4%</span>
+                <span id="weight-rating-val" class="text-xs font-mono font-bold text-gold-650">33.4%</span>
               </div>
               <input type="range" id="weight-rating" min="0" max="100" step="0.1" value="33.4"
                 class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
@@ -543,12 +553,12 @@
             <div class="relative w-full sm:w-64">
               <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
               <input type="text" id="photo-search" placeholder="Search studio / location..."
-                class="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-300 transition">
+                class="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-gold-300 transition">
             </div>
 
             <!-- Availability filter -->
             <select id="photo-filter-status"
-              class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-gold-300 transition cursor-pointer">
               <option value="All">All Statuses</option>
               <option value="Inquiry">Inquiry</option>
               <option value="Available">Available</option>
@@ -559,7 +569,7 @@
             <!-- View Toggle -->
             <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto">
               <button onclick="setPhotographerLayout('grid')" id="btn-layout-grid"
-                class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm">
+                class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-gold-600 shadow-sm">
                 <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
                 <span>Grid</span>
               </button>
@@ -573,7 +583,7 @@
 
           <div class="flex items-center gap-2 w-full sm:w-auto">
             <button onclick="openPhotographerModal()"
-              class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm cursor-pointer">
+              class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-700 hover:to-gold-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm cursor-pointer">
               <i data-lucide="plus" class="w-4 h-4"></i>
               <span>Add Candidate</span>
             </button>
@@ -595,7 +605,7 @@
         <!-- Weighing Algorithm Card -->
         <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
           <div class="flex items-center gap-2 mb-4">
-            <i data-lucide="sliders" class="w-5 h-5 text-indigo-650"></i>
+            <i data-lucide="sliders" class="w-5 h-5 text-gold-650"></i>
             <h3 class="text-lg font-bold text-slate-800">Other Vendors Rank Calculator</h3>
           </div>
           <p class="text-slate-500 text-xs leading-relaxed mb-6">
@@ -610,7 +620,7 @@
             <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
               <div class="flex justify-between items-center mb-2">
                 <span class="text-sm font-semibold text-slate-700">Quality / Experience</span>
-                <span id="weight-vendor-quality-val" class="text-xs font-mono font-bold text-indigo-650">33.3%</span>
+                <span id="weight-vendor-quality-val" class="text-xs font-mono font-bold text-gold-650">33.3%</span>
               </div>
               <input type="range" id="weight-vendor-quality" min="0" max="100" step="0.1" value="33.3"
                 class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
@@ -620,7 +630,7 @@
             <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
               <div class="flex justify-between items-center mb-2">
                 <span class="text-sm font-semibold text-slate-700">Pricing Weight</span>
-                <span id="weight-vendor-pricing-val" class="text-xs font-mono font-bold text-indigo-650">33.3%</span>
+                <span id="weight-vendor-pricing-val" class="text-xs font-mono font-bold text-gold-650">33.3%</span>
               </div>
               <input type="range" id="weight-vendor-pricing" min="0" max="100" step="0.1" value="33.3"
                 class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
@@ -630,7 +640,7 @@
             <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
               <div class="flex justify-between items-center mb-2">
                 <span class="text-sm font-semibold text-slate-700">Subjective Rating</span>
-                <span id="weight-vendor-rating-val" class="text-xs font-mono font-bold text-indigo-650">33.4%</span>
+                <span id="weight-vendor-rating-val" class="text-xs font-mono font-bold text-gold-650">33.4%</span>
               </div>
               <input type="range" id="weight-vendor-rating" min="0" max="100" step="0.1" value="33.4"
                 class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
@@ -648,12 +658,12 @@
             <div class="relative w-full sm:w-64">
               <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
               <input type="text" id="vendor-search" placeholder="Search brand / lead..."
-                class="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-300 transition">
+                class="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-gold-300 transition">
             </div>
 
             <!-- Category filter -->
             <select id="vendor-filter-category"
-              class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-gold-300 transition cursor-pointer">
               <option value="All">All Categories</option>
               <option value="Singer">Singer</option>
               <option value="Anchor">Anchor</option>
@@ -665,7 +675,7 @@
 
             <!-- Availability filter -->
             <select id="vendor-filter-status"
-              class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-gold-300 transition cursor-pointer">
               <option value="All">All Statuses</option>
               <option value="Inquiry">Inquiry</option>
               <option value="Available">Available</option>
@@ -676,7 +686,7 @@
             <!-- View Toggle -->
             <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto">
               <button onclick="setVendorLayout('grid')" id="btn-vendor-layout-grid"
-                class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm">
+                class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-gold-600 shadow-sm">
                 <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
                 <span>Grid</span>
               </button>
@@ -690,7 +700,7 @@
 
           <div class="flex items-center gap-2 w-full sm:w-auto">
             <button onclick="openVendorModal()"
-              class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm cursor-pointer">
+              class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-700 hover:to-gold-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm cursor-pointer">
               <i data-lucide="plus" class="w-4 h-4"></i>
               <span>Add Candidate</span>
             </button>
@@ -710,7 +720,7 @@
       <section id="tab-view-expenses" class="space-y-6 hidden">
 
         <!-- Budget Edit Area & Stat Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
 
           <!-- Budget Card (Editable) -->
           <div
@@ -720,7 +730,7 @@
                 <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Total
                   Budget</span>
                 <button onclick="toggleEditBudget()" id="btn-edit-budget"
-                  class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold flex items-center gap-1">
+                  class="text-gold-600 hover:text-gold-800 text-xs font-semibold flex items-center gap-1">
                   <i data-lucide="edit-2" class="w-3 h-3"></i><span>Edit</span>
                 </button>
               </div>
@@ -730,10 +740,10 @@
               <div id="budget-edit-input-container" class="hidden mt-2">
                 <div class="flex gap-2">
                   <input type="number" id="input-expense-budget"
-                    class="w-full px-2.5 py-1 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-300 font-mono"
+                    class="w-full px-2.5 py-1 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-gold-300 font-mono"
                     value="500000">
                   <button onclick="saveBudget()"
-                    class="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold">Save</button>
+                    class="px-3 py-1 bg-gold-600 hover:bg-gold-700 text-white rounded-xl text-xs font-semibold">Save</button>
                 </div>
               </div>
             </div>
@@ -746,7 +756,7 @@
             <div>
               <span class="text-xs text-slate-500 font-mono uppercase tracking-wider font-semibold">Total
                 Expenses</span>
-              <h4 id="expense-stat-spent" class="text-2xl font-bold text-indigo-650 mt-2">₹0.00</h4>
+              <h4 id="expense-stat-spent" class="text-2xl font-bold text-gold-650 mt-2">₹0.00</h4>
             </div>
             <p id="spent-percentage" class="text-[10px] text-slate-500 mt-2 font-mono">0% of budget used</p>
           </div>
@@ -793,11 +803,11 @@
             <div class="relative w-full sm:w-64">
               <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
               <input type="text" id="expense-search" placeholder="Search description / vendor..."
-                class="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-300 transition">
+                class="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-gold-300 transition">
             </div>
             <!-- Category Filter -->
             <select id="expense-filter-category"
-              class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              class="w-full sm:w-44 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-gold-300 transition cursor-pointer">
               <option value="All">All Categories</option>
               <option value="Venue">Venue</option>
               <option value="Catering">Catering</option>
@@ -811,7 +821,7 @@
             </select>
             <!-- Status Filter -->
             <select id="expense-filter-status"
-              class="w-full sm:w-40 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+              class="w-full sm:w-40 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-sm text-slate-650 focus:outline-none focus:border-gold-300 transition cursor-pointer">
               <option value="All">All Statuses</option>
               <option value="Paid">Paid</option>
               <option value="Pending">Pending</option>
@@ -819,7 +829,7 @@
           </div>
 
           <button onclick="openExpenseModal()"
-            class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm">
+            class="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-700 hover:to-gold-800 text-white font-semibold text-sm transition-all duration-200 shadow-sm">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Record Expense</span>
           </button>
@@ -885,7 +895,7 @@
         class="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full p-6 shadow-xl transform scale-95 transition-all duration-300 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-6">
           <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <i data-lucide="camera" class="w-5 h-5 text-indigo-600"></i>
+            <i data-lucide="camera" class="w-5 h-5 text-gold-600"></i>
             <span id="modal-photo-title">Add Photographer</span>
           </h3>
           <button onclick="closePhotographerModal()" class="text-slate-400 hover:text-slate-650">
@@ -900,13 +910,13 @@
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Studio Name *</label>
               <input type="text" id="photo-studio" required
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Lead Photographer
                 *</label>
               <input type="text" id="photo-lead" required
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
           </div>
 
@@ -915,7 +925,7 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Availability
                 Status</label>
               <select id="photo-status"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-gold-300 transition cursor-pointer">
                 <option value="Inquiry">Inquiry</option>
                 <option value="Available">Available</option>
                 <option value="Tentative">Tentative</option>
@@ -925,13 +935,13 @@
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Base Location</label>
               <input type="text" id="photo-location" placeholder="e.g. Pune"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Instagram
                 Link</label>
               <input type="text" id="photo-instagram" placeholder="@studio"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
           </div>
 
@@ -940,24 +950,24 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Total Quote (INR)
                 *</label>
               <input type="number" id="photo-pricing" required
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Advance %
                 Paid</label>
               <input type="number" id="photo-advance" min="0" max="100"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Rating (1-10)
                 *</label>
               <input type="number" id="photo-rating" min="1" max="10" step="0.5" required
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Team Size</label>
               <input type="number" id="photo-team" min="1"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
           </div>
 
@@ -966,7 +976,7 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono font-medium">Physical
                 Album Included?</label>
               <select id="photo-album"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-gold-300 transition cursor-pointer">
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
               </select>
@@ -975,7 +985,7 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Camera & Gear
                 Details</label>
               <input type="text" id="photo-equipment" placeholder="e.g. Sony A7IV, Drone, Prime lenses"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
           </div>
 
@@ -984,13 +994,13 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Key
                 Deliverables</label>
               <input type="text" id="photo-deliverables" placeholder="e.g. 500 edited images, raw videos"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Remarks / Custom
                 Notes</label>
               <input type="text" id="photo-remarks" placeholder="Special requirements, discounts..."
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
           </div>
 
@@ -998,7 +1008,7 @@
             <button type="button" onclick="closePhotographerModal()"
               class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold text-xs transition shadow-sm">Cancel</button>
             <button type="submit"
-              class="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs transition shadow-sm">Save
+              class="px-6 py-2 rounded-xl bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-700 hover:to-gold-800 text-white font-semibold text-xs transition shadow-sm">Save
               Candidate</button>
           </div>
         </form>
@@ -1016,7 +1026,7 @@
         class="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full p-6 shadow-xl transform scale-95 transition-all duration-300 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-6">
           <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <i data-lucide="briefcase" class="w-5 h-5 text-indigo-600"></i>
+            <i data-lucide="briefcase" class="w-5 h-5 text-gold-600"></i>
             <span id="modal-vendor-title">Add Vendor Candidate</span>
           </h3>
           <button onclick="closeVendorModal()" class="text-slate-400 hover:text-slate-650">
@@ -1031,7 +1041,7 @@
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Category *</label>
               <select id="vendor-category" required
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-gold-300 transition cursor-pointer">
                 <option value="Singer">Singer</option>
                 <option value="Anchor">Anchor</option>
                 <option value="Decorator">Decorator</option>
@@ -1044,7 +1054,7 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Studio / Brand Name
                 *</label>
               <input type="text" id="vendor-studio" required
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
           </div>
 
@@ -1053,13 +1063,13 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Lead Contact Name
                 *</label>
               <input type="text" id="vendor-lead" required
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Availability
                 Status</label>
               <select id="vendor-status"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-gold-300 transition cursor-pointer">
                 <option value="Inquiry">Inquiry</option>
                 <option value="Available">Available</option>
                 <option value="Tentative">Tentative</option>
@@ -1069,7 +1079,7 @@
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Base Location</label>
               <input type="text" id="vendor-location" placeholder="e.g. Pune"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
           </div>
 
@@ -1078,24 +1088,24 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Total Quote (INR)
                 *</label>
               <input type="number" id="vendor-pricing" required
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Advance Paid
                 (INR)</label>
               <input type="number" id="vendor-advance" min="0" value="0"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Rating (1-10)
                 *</label>
               <input type="number" id="vendor-rating" min="1" max="10" step="0.5" required
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Team Size</label>
               <input type="number" id="vendor-team" min="1" value="1"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
           </div>
 
@@ -1104,13 +1114,13 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Instagram
                 Link</label>
               <input type="text" id="vendor-instagram" placeholder="@handle"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div class="sm:col-span-2">
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Experience & Quality
                 Specs</label>
               <input type="text" id="vendor-equipment" placeholder="e.g. 5+ years experience, high quality setup"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
           </div>
 
@@ -1119,13 +1129,13 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Key
                 Deliverables</label>
               <input type="text" id="vendor-deliverables" placeholder="e.g. Sound system included, 3 hrs performance"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Remarks / Custom
                 Notes</label>
               <input type="text" id="vendor-remarks" placeholder="Special requirements, discounts..."
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
           </div>
 
@@ -1133,7 +1143,7 @@
             <button type="button" onclick="closeVendorModal()"
               class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold text-xs transition shadow-sm">Cancel</button>
             <button type="submit"
-              class="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs transition shadow-sm">Save
+              class="px-6 py-2 rounded-xl bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-700 hover:to-gold-800 text-white font-semibold text-xs transition shadow-sm">Save
               Candidate</button>
           </div>
         </form>
@@ -1142,7 +1152,7 @@
 
     <!-- Always-visible Floating Action Button (FAB) for Recording Transaction -->
     <button onclick="openExpenseModal()" id="btn-fab-record"
-      class="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold text-sm shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 active:scale-95 group">
+      class="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-700 hover:to-gold-800 text-white font-bold text-sm shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 active:scale-95 group">
       <i data-lucide="plus-circle" class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"></i>
       <span>Record Expense</span>
     </button>
@@ -1156,7 +1166,7 @@
         class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-xl transform scale-95 transition-all duration-300">
         <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-6">
           <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <i data-lucide="indian-rupee" class="w-5 h-5 text-indigo-600"></i>
+            <i data-lucide="indian-rupee" class="w-5 h-5 text-gold-600"></i>
             <span id="modal-expense-title">Record Expense</span>
           </h3>
           <button onclick="closeExpenseModal()" class="text-slate-400 hover:text-slate-650">
@@ -1170,7 +1180,7 @@
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Description *</label>
             <input type="text" id="expense-title" required placeholder="e.g. Catering Deposit"
-              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1178,7 +1188,7 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono font-medium">Category
                 *</label>
               <select id="expense-category" required
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-gold-300 transition cursor-pointer">
                 <option value="Venue">Venue</option>
                 <option value="Catering">Catering</option>
                 <option value="Decor">Decor</option>
@@ -1193,7 +1203,7 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono font-medium">Payment
                 Status</label>
               <select id="expense-status" required
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-indigo-300 transition cursor-pointer">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm focus:outline-none focus:border-gold-300 transition cursor-pointer">
                 <option value="Paid">Paid</option>
                 <option value="Pending">Pending</option>
               </select>
@@ -1205,12 +1215,12 @@
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Amount (INR)
                 *</label>
               <input type="number" id="expense-amount" required placeholder="e.g. 15000"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Vendor Name</label>
               <input type="text" id="expense-vendor" placeholder="e.g. Baker's Pride"
-                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition">
+                class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition">
             </div>
           </div>
 
@@ -1218,14 +1228,14 @@
             <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase font-mono">Remarks / Custom
               Notes</label>
             <textarea id="expense-remarks" placeholder="Add receipt references, pending dates..." rows="3"
-              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-300 transition resize-none"></textarea>
+              class="w-full px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-gold-300 transition resize-none"></textarea>
           </div>
 
           <div class="flex justify-end gap-3 border-t border-slate-200 pt-4 mt-6">
             <button type="button" onclick="closeExpenseModal()"
               class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-semibold text-xs transition shadow-sm">Cancel</button>
             <button type="submit"
-              class="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold text-xs transition shadow-sm">Record
+              class="px-6 py-2 rounded-xl bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-700 hover:to-gold-800 text-white font-semibold text-xs transition shadow-sm">Record
               Transaction</button>
           </div>
         </form>
@@ -1237,12 +1247,12 @@
   <div id="login-container" class="hidden min-h-screen flex flex-col justify-center items-center px-4 bg-slate-50">
     <div class="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-8 shadow-xl relative overflow-hidden">
       <!-- Decorative background blur -->
-      <div class="absolute -right-24 -top-24 w-48 h-48 bg-indigo-50/50 rounded-full blur-3xl"></div>
-      <div class="absolute -left-24 -bottom-24 w-48 h-48 bg-indigo-50/30 rounded-full blur-3xl"></div>
+      <div class="absolute -right-24 -top-24 w-48 h-48 bg-gold-50/50 rounded-full blur-3xl"></div>
+      <div class="absolute -left-24 -bottom-24 w-48 h-48 bg-gold-50/30 rounded-full blur-3xl"></div>
 
       <div class="relative flex flex-col items-center">
         <!-- Logo -->
-        <div class="p-3 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl shadow-md text-white mb-6">
+        <div class="p-3 bg-gradient-to-br from-gold-500 to-gold-600 rounded-2xl shadow-md text-white mb-6">
           <i data-lucide="gem" class="w-8 h-8"></i>
         </div>
 
@@ -1259,7 +1269,7 @@
 
         <!-- Google Sign-In Button -->
         <button onclick="handleGoogleSignIn()"
-          class="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-indigo-300 text-slate-700 font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] group">
+          class="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-gold-300 text-slate-700 font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] group">
           <svg class="w-5 h-5 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
             <path fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -1542,8 +1552,8 @@
         // Flash the login button
         const btn = document.getElementById('btn-google-login');
         if (btn) {
-          btn.classList.add('ring-2', 'ring-indigo-400', 'scale-105');
-          setTimeout(() => btn.classList.remove('ring-2', 'ring-indigo-400', 'scale-105'), 1000);
+          btn.classList.add('ring-2', 'ring-gold-400', 'scale-105');
+          setTimeout(() => btn.classList.remove('ring-2', 'ring-gold-400', 'scale-105'), 1000);
         }
         return false;
       }
@@ -2006,7 +2016,7 @@
       tableWrapper.className = 'overflow-x-auto bg-white border border-slate-200 rounded-3xl shadow-sm';
 
       const statusColors = {
-        'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+        'Inquiry': 'bg-gold-50 text-gold-600 border-gold-100',
         'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
         'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
         'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
@@ -2024,7 +2034,7 @@
                 <div class="font-semibold text-slate-900 text-sm flex items-center gap-1.5">
                   ${p.studio}
                   ${isRank1 ? `
-                    <span class="inline-flex items-center gap-0.5 bg-indigo-650 text-white font-bold text-[9px] uppercase font-mono px-2.5 py-0.5 rounded-full shadow-sm">
+                    <span class="inline-flex items-center gap-0.5 bg-gold-650 text-white font-bold text-[9px] uppercase font-mono px-2.5 py-0.5 rounded-full shadow-sm">
                       <i data-lucide="crown" class="w-2.5 h-2.5"></i> Rank 1
                     </span>
                   ` : ''}
@@ -2033,7 +2043,7 @@
                   <span class="text-xs text-slate-500 font-mono">${p.leadName || 'No Lead'}</span>
                   ${p.instagram ? `
                     <span class="text-slate-300">•</span>
-                    <a href="https://instagram.com/${p.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-0.5 text-[10px] text-indigo-650 hover:underline font-mono">
+                    <a href="https://instagram.com/${p.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-0.5 text-[10px] text-gold-650 hover:underline font-mono">
                       <i data-lucide="instagram" class="w-2.5 h-2.5"></i> ${p.instagram}
                     </a>
                   ` : ''}
@@ -2055,8 +2065,8 @@
                   <span class="font-bold text-slate-700">${p.prScore}</span>
                 </div>
                 <div class="border-l border-slate-200 pl-2">
-                  <span class="text-[9px] text-indigo-600 block uppercase font-bold">Score</span>
-                  <span class="font-black text-indigo-700">${p.finalScore}</span>
+                  <span class="text-[9px] text-gold-600 block uppercase font-bold">Score</span>
+                  <span class="font-black text-gold-700">${p.finalScore}</span>
                 </div>
               </div>
             </td>
@@ -2110,11 +2120,11 @@
       const btnTable = document.getElementById("btn-layout-table");
       if (btnGrid && btnTable) {
         if (state.photographerLayout === 'grid') {
-          btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm";
+          btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-gold-600 shadow-sm";
           btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 hover:text-slate-800";
         } else {
           btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 hover:text-slate-800";
-          btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm";
+          btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-gold-600 shadow-sm";
         }
       }
 
@@ -2150,14 +2160,14 @@
         list.forEach(p => {
           const isRank1 = p.id === photoObj.rank1Id;
           const statusColors = {
-            'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+            'Inquiry': 'bg-gold-50 text-gold-600 border-gold-100',
             'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
             'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
             'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
           };
 
           const card = document.createElement('div');
-          card.className = `relative bg-white border ${isRank1 ? 'border-indigo-500 pulse-glow' : 'border-slate-200'} rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between`;
+          card.className = `relative bg-white border ${isRank1 ? 'border-gold-500 pulse-glow' : 'border-slate-200'} rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between`;
 
           card.innerHTML = `
             <div>
@@ -2165,7 +2175,7 @@
               <div class="flex items-center justify-between mb-4">
                 <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${statusColors[p.status] || 'bg-slate-50 text-slate-650 border-slate-200'}">${p.status || 'Inquiry'}</span>
                 ${isRank1 ? `
-                  <span class="flex items-center gap-1 bg-indigo-650 text-white font-bold text-[10px] uppercase font-mono px-2.5 py-1 rounded-full shadow-sm">
+                  <span class="flex items-center gap-1 bg-gold-650 text-white font-bold text-[10px] uppercase font-mono px-2.5 py-1 rounded-full shadow-sm">
                     <i data-lucide="crown" class="w-3 h-3"></i> Rank 1
                   </span>
                 ` : ''}
@@ -2176,7 +2186,7 @@
               <p class="text-xs text-slate-500 font-mono mt-0.5">${p.leadName} • ${p.location}</p>
               
               ${p.instagram ? `
-                <a href="https://instagram.com/${p.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-indigo-650 hover:underline font-mono mt-1.5">
+                <a href="https://instagram.com/${p.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-gold-650 hover:underline font-mono mt-1.5">
                   <i data-lucide="instagram" class="w-3 h-3"></i> ${p.instagram}
                 </a>
               ` : ''}
@@ -2192,8 +2202,8 @@
                   <div class="text-sm font-bold text-slate-750 mt-0.5">${p.prScore}</div>
                 </div>
                 <div class="border-l border-slate-200">
-                  <span class="text-[9px] text-indigo-600 uppercase font-bold">Score</span>
-                  <div class="text-sm font-black text-indigo-700 mt-0.5">${p.finalScore}</div>
+                  <span class="text-[9px] text-gold-600 uppercase font-bold">Score</span>
+                  <div class="text-sm font-black text-gold-700 mt-0.5">${p.finalScore}</div>
                 </div>
               </div>
 
@@ -2329,7 +2339,7 @@
       tableWrapper.className = 'overflow-x-auto bg-white border border-slate-200 rounded-3xl shadow-sm';
 
       const statusColors = {
-        'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+        'Inquiry': 'bg-gold-50 text-gold-600 border-gold-100',
         'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
         'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
         'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
@@ -2348,7 +2358,7 @@
                 <div class="font-semibold text-slate-900 text-sm flex items-center gap-1.5">
                   ${v.studio}
                   ${isRank1 ? `
-                    <span class="inline-flex items-center gap-0.5 bg-indigo-650 text-white font-bold text-[9px] uppercase font-mono px-2.5 py-0.5 rounded-full shadow-sm">
+                    <span class="inline-flex items-center gap-0.5 bg-gold-650 text-white font-bold text-[9px] uppercase font-mono px-2.5 py-0.5 rounded-full shadow-sm">
                       <i data-lucide="crown" class="w-2.5 h-2.5"></i> Rank 1
                     </span>
                   ` : ''}
@@ -2357,7 +2367,7 @@
                   <span class="text-xs text-slate-500 font-mono">${v.leadName || 'No Lead'}</span>
                   ${v.instagram ? `
                     <span class="text-slate-300">•</span>
-                    <a href="https://instagram.com/${v.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-0.5 text-[10px] text-indigo-650 hover:underline font-mono">
+                    <a href="https://instagram.com/${v.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-0.5 text-[10px] text-gold-650 hover:underline font-mono">
                       <i data-lucide="instagram" class="w-2.5 h-2.5"></i> ${v.instagram}
                     </a>
                   ` : ''}
@@ -2382,8 +2392,8 @@
                   <span class="font-bold text-slate-700">${v.prScore}</span>
                 </div>
                 <div class="border-l border-slate-200 pl-2">
-                  <span class="text-[9px] text-indigo-600 block uppercase font-bold">Score</span>
-                  <span class="font-black text-indigo-700">${v.finalScore}</span>
+                  <span class="text-[9px] text-gold-600 block uppercase font-bold">Score</span>
+                  <span class="font-black text-gold-700">${v.finalScore}</span>
                 </div>
               </div>
             </td>
@@ -2436,11 +2446,11 @@
       const btnTable = document.getElementById("btn-vendor-layout-table");
       if (btnGrid && btnTable) {
         if (state.vendorLayout === 'grid') {
-          btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm";
+          btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-gold-600 shadow-sm";
           btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 hover:text-slate-800";
         } else {
           btnGrid.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer text-slate-500 hover:text-slate-800";
-          btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-indigo-600 shadow-sm";
+          btnTable.className = "flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white text-gold-600 shadow-sm";
         }
       }
 
@@ -2478,14 +2488,14 @@
         list.forEach(v => {
           const isRank1 = vendorObj.rank1Ids[v.category] === v.id;
           const statusColors = {
-            'Inquiry': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+            'Inquiry': 'bg-gold-50 text-gold-600 border-gold-100',
             'Available': 'bg-emerald-50 text-emerald-600 border-emerald-100',
             'Tentative': 'bg-amber-50 text-amber-600 border-amber-100',
             'Booked': 'bg-rose-50 text-rose-600 border-rose-100'
           };
 
           const card = document.createElement('div');
-          card.className = `relative bg-white border ${isRank1 ? 'border-indigo-500 pulse-glow' : 'border-slate-200'} rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between`;
+          card.className = `relative bg-white border ${isRank1 ? 'border-gold-500 pulse-glow' : 'border-slate-200'} rounded-3xl p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between`;
 
           card.innerHTML = `
             <div>
@@ -2495,7 +2505,7 @@
                 <div class="flex gap-1.5 items-center">
                   <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 border border-slate-200 text-slate-700">${v.category}</span>
                   ${isRank1 ? `
-                    <span class="flex items-center gap-1 bg-indigo-650 text-white font-bold text-[10px] uppercase font-mono px-2.5 py-1 rounded-full shadow-sm">
+                    <span class="flex items-center gap-1 bg-gold-650 text-white font-bold text-[10px] uppercase font-mono px-2.5 py-1 rounded-full shadow-sm">
                       <i data-lucide="crown" class="w-3 h-3"></i> Rank 1
                     </span>
                   ` : ''}
@@ -2507,7 +2517,7 @@
               <p class="text-xs text-slate-500 font-mono mt-0.5">${v.leadName} • ${v.location}</p>
               
               ${v.instagram ? `
-                <a href="https://instagram.com/${v.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-indigo-650 hover:underline font-mono mt-1.5">
+                <a href="https://instagram.com/${v.instagram.replace('@', '')}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-gold-650 hover:underline font-mono mt-1.5">
                   <i data-lucide="instagram" class="w-3 h-3"></i> ${v.instagram}
                 </a>
               ` : ''}
@@ -2523,8 +2533,8 @@
                   <div class="text-sm font-bold text-slate-750 mt-0.5">${v.prScore}</div>
                 </div>
                 <div class="border-l border-slate-200">
-                  <span class="text-[9px] text-indigo-600 uppercase font-bold">Score</span>
-                  <div class="text-sm font-black text-indigo-700 mt-0.5">${v.finalScore}</div>
+                  <span class="text-[9px] text-gold-600 uppercase font-bold">Score</span>
+                  <div class="text-sm font-black text-gold-700 mt-0.5">${v.finalScore}</div>
                 </div>
               </div>
 
@@ -2986,7 +2996,7 @@
 
         tr.innerHTML = `
           <td class="py-4 px-6 font-semibold text-slate-800">${exp.title}</td>
-          <td class="py-4 px-6 font-mono text-xs text-indigo-650 font-semibold">${exp.category}</td>
+          <td class="py-4 px-6 font-mono text-xs text-gold-650 font-semibold">${exp.category}</td>
           <td class="py-4 px-6 text-center">
             ${state.isEditor ? `
               <select onchange="updateExpenseStatus('${exp.id}', this.value)" class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadges[exp.status]} bg-white focus:outline-none cursor-pointer">

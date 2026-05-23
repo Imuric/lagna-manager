@@ -1536,6 +1536,25 @@
       return true;
     }
 
+    function withTimeout(promise, ms = 4000) {
+      let timeoutId;
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error('TIMEOUT'));
+        }, ms);
+      });
+      return Promise.race([promise, timeoutPromise]).then(
+        (result) => {
+          clearTimeout(timeoutId);
+          return result;
+        },
+        (err) => {
+          clearTimeout(timeoutId);
+          throw err;
+        }
+      );
+    }
+
     class CollaborativeDB {
       constructor() {
         this.isMock = true;
@@ -1743,7 +1762,7 @@
 
         if (!this.auth.currentUser || !state.isEditor) return;
         const budgetDocRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'config', 'budget');
-        await setDoc(budgetDocRef, { value: parseFloat(value) || 500000 });
+        await withTimeout(setDoc(budgetDocRef, { value: parseFloat(value) || 500000 }), 4000);
       }
 
       // CRUD Core Functions
@@ -1766,7 +1785,7 @@
         if (!this.auth.currentUser || !state.isEditor) return;
         const targetId = id || `${colName.slice(0, 4)}_${Date.now()}`;
         const docRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', colName, targetId);
-        await setDoc(docRef, { id: targetId, ...record }, { merge: true });
+        await withTimeout(setDoc(docRef, { id: targetId, ...record }, { merge: true }), 4000);
       }
 
       async deleteRecord(colName, id) {
@@ -1781,7 +1800,7 @@
 
         if (!this.auth.currentUser || !state.isEditor) return;
         const docRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', colName, id);
-        await deleteDoc(docRef);
+        await withTimeout(deleteDoc(docRef), 4000);
       }
     }
 
@@ -2732,7 +2751,12 @@
         showToast(id ? 'Photographer details updated successfully.' : 'New photographer added to grid.', 'success');
         closePhotographerModal();
       } catch (err) {
-        showToast('Failed to save photographer.', 'error');
+        console.error(err);
+        if (err.message === 'TIMEOUT') {
+          showToast('⚠️ Save timed out. Please disable your ad-blocker or Brave Shields.', 'error');
+        } else {
+          showToast('Failed to save photographer.', 'error');
+        }
       }
     };
 
@@ -2750,7 +2774,12 @@
             await dbHelper.deleteRecord('photographers', id);
             showToast('Photographer entry deleted.', 'success');
           } catch (e) {
-            showToast('Failed to delete photographer.', 'error');
+            console.error(e);
+            if (e.message === 'TIMEOUT') {
+              showToast('⚠️ Delete timed out. Please disable your ad-blocker.', 'error');
+            } else {
+              showToast('Failed to delete photographer.', 'error');
+            }
           }
         }
       );
@@ -2827,7 +2856,12 @@
         showToast(id ? 'Vendor details updated successfully.' : 'New vendor candidate added.', 'success');
         closeVendorModal();
       } catch (err) {
-        showToast('Failed to save vendor.', 'error');
+        console.error(err);
+        if (err.message === 'TIMEOUT') {
+          showToast('⚠️ Save timed out. Please disable your ad-blocker or Brave Shields.', 'error');
+        } else {
+          showToast('Failed to save vendor.', 'error');
+        }
       }
     };
 
@@ -2845,7 +2879,12 @@
             await dbHelper.deleteRecord('vendors', id);
             showToast('Vendor candidate deleted.', 'success');
           } catch (e) {
-            showToast('Failed to delete vendor.', 'error');
+            console.error(e);
+            if (e.message === 'TIMEOUT') {
+              showToast('⚠️ Delete timed out. Please disable your ad-blocker.', 'error');
+            } else {
+              showToast('Failed to delete vendor.', 'error');
+            }
           }
         }
       );
@@ -2994,7 +3033,12 @@
         showToast("Expense budget updated.", "success");
         toggleEditBudget();
       } catch (e) {
-        showToast("Failed to save budget.", "error");
+        console.error(e);
+        if (e.message === 'TIMEOUT') {
+          showToast("⚠️ Save timed out. Please disable your ad-blocker or Brave Shields.", "error");
+        } else {
+          showToast("Failed to save budget.", "error");
+        }
       }
     };
 
@@ -3007,7 +3051,12 @@
         await dbHelper.saveRecord('expenses', id, { ...exp, status: statusVal });
         showToast(`Transaction set to ${statusVal}.`, 'success');
       } catch (e) {
-        showToast('Failed to update status.', 'error');
+        console.error(e);
+        if (e.message === 'TIMEOUT') {
+          showToast("⚠️ Status update timed out. Please disable your ad-blocker.", "error");
+        } else {
+          showToast('Failed to update status.', 'error');
+        }
       }
     };
 
@@ -3062,7 +3111,12 @@
         showToast(id ? 'Expense details updated.' : 'New transaction recorded.', 'success');
         closeExpenseModal();
       } catch (err) {
-        showToast('Failed to save expense details.', 'error');
+        console.error(err);
+        if (err.message === 'TIMEOUT') {
+          showToast('⚠️ Save timed out. Please disable your ad-blocker or Brave Shields.', 'error');
+        } else {
+          showToast('Failed to save expense details.', 'error');
+        }
       }
     };
 
@@ -3080,7 +3134,12 @@
             await dbHelper.deleteRecord('expenses', id);
             showToast('Expense record deleted.', 'success');
           } catch (e) {
-            showToast('Failed to delete expense record.', 'error');
+            console.error(e);
+            if (e.message === 'TIMEOUT') {
+              showToast('⚠️ Delete timed out. Please disable your ad-blocker.', 'error');
+            } else {
+              showToast('Failed to delete expense record.', 'error');
+            }
           }
         }
       );

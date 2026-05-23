@@ -1888,8 +1888,15 @@
     // ==========================================
     // STATE MANAGEMENT & CONFIGS
     // ==========================================
+    const ALLOWED_EDITORS = [
+      'patilmayuri0023@gmail.com',
+      'prathameshpatil3221@gmail.com',
+      'uxbypratham@gmail.com'
+    ];
+
     window.state = {
       activeTab: 'dashboard',
+      isEditor: false,
       weights: [33.3, 33.3, 33.4], // [Equipment, Pricing, Rating]
       photographers: [],
       shopping: [],
@@ -1988,6 +1995,7 @@
       // If mock mode (no Firebase connection or local storage replication), bypass login gate
       if (dbHelper && dbHelper.isMock) {
         isGoogleUser = false;
+        state.isEditor = true;
         if (loginBtn) {
           loginBtn.classList.add('hidden');
           loginBtn.classList.remove('flex');
@@ -2006,6 +2014,9 @@
 
       if (user && user.providerData && user.providerData.length > 0 && user.providerData[0].providerId === 'google.com') {
         isGoogleUser = true;
+        const userEmail = (user.email || '').toLowerCase();
+        state.isEditor = ALLOWED_EDITORS.includes(userEmail);
+
         if (loginBtn) {
           loginBtn.classList.add('hidden');
           loginBtn.classList.remove('flex');
@@ -2020,7 +2031,11 @@
         if (appContainer) appContainer.classList.remove('hidden');
         if (loginContainer) loginContainer.classList.add('hidden');
         
-        updateSyncStatus('connected', `Synced · ${user.displayName ? user.displayName.split(' ')[0] : 'Editor'}`);
+        if (state.isEditor) {
+          updateSyncStatus('connected', `Synced · ${user.displayName ? user.displayName.split(' ')[0] : 'Editor'}`);
+        } else {
+          updateSyncStatus('readonly', `Read-Only · ${user.displayName ? user.displayName.split(' ')[0] : 'Guest'}`);
+        }
         
         // Setup Firestore snapshot listeners
         if (dbHelper) {
@@ -2028,6 +2043,7 @@
         }
       } else {
         isGoogleUser = false;
+        state.isEditor = false;
         if (loginBtn) {
           loginBtn.classList.remove('hidden');
           loginBtn.classList.add('flex');
@@ -2092,13 +2108,17 @@
     function requireGoogleAuth() {
       if (dbHelper && dbHelper.isMock) return true;
       if (!isGoogleUser) {
-        showToast('🔒 Login with Google to make changes.', 'error');
+        showToast('🔒 Login with Google to view or edit.', 'error');
         // Flash the login button
         const btn = document.getElementById('btn-google-login');
         if (btn) {
           btn.classList.add('ring-2', 'ring-indigo-400', 'scale-105');
           setTimeout(() => btn.classList.remove('ring-2', 'ring-indigo-400', 'scale-105'), 1000);
         }
+        return false;
+      }
+      if (!state.isEditor) {
+        showToast('🔒 Access Denied. Your account does not have edit permissions.', 'error');
         return false;
       }
       return true;
@@ -2427,9 +2447,6 @@
       };
     }
 
-    // ==========================================
-    // RENDERING LOGIC
-    // ==========================================
     function triggerAllRenders() {
       const calculatedPhotos = getRankedPhotographers();
 
@@ -2439,6 +2456,27 @@
       renderGuestList();
       renderTimelineBoard();
       renderExpenses();
+
+      // Show/hide editor only buttons
+      const addPhotoBtn = document.querySelector('[onclick="openPhotographerModal()"]');
+      const seedPhotoBtn = document.querySelector('[onclick="bulkSeedPhotographers()"]');
+      const addShopBtn = document.querySelector('[onclick="openShoppingModal()"]');
+      const addGuestBtn = document.querySelector('[onclick="openGuestModal()"]');
+      const addTaskBtn = document.querySelector('[onclick="openTaskModal()"]');
+      const addExpenseBtns = document.querySelectorAll('[onclick="openExpenseModal()"]');
+      const editBudgetBtn = document.getElementById('btn-edit-budget');
+      const fabRecordBtn = document.getElementById('btn-fab-record');
+
+      if (addPhotoBtn) addPhotoBtn.style.display = state.isEditor ? 'flex' : 'none';
+      if (seedPhotoBtn) seedPhotoBtn.style.display = state.isEditor ? 'flex' : 'none';
+      if (addShopBtn) addShopBtn.style.display = state.isEditor ? 'flex' : 'none';
+      if (addGuestBtn) addGuestBtn.style.display = state.isEditor ? 'flex' : 'none';
+      if (addTaskBtn) addTaskBtn.style.display = state.isEditor ? 'flex' : 'none';
+      addExpenseBtns.forEach(btn => {
+        btn.style.display = state.isEditor ? 'flex' : 'none';
+      });
+      if (editBudgetBtn) editBudgetBtn.style.display = state.isEditor ? 'flex' : 'none';
+      if (fabRecordBtn) fabRecordBtn.style.display = state.isEditor ? 'flex' : 'none';
 
       lucide.createIcons();
     }
@@ -2557,7 +2595,7 @@
                 <div class="font-semibold text-slate-900 text-sm flex items-center gap-1.5">
                   ${p.studio}
                   ${isRank1 ? `
-                    <span class="inline-flex items-center gap-0.5 bg-indigo-650 text-white font-bold text-[9px] uppercase font-mono px-2 py-0.5 rounded-full shadow-sm">
+                    <span class="inline-flex items-center gap-0.5 bg-indigo-650 text-white font-bold text-[9px] uppercase font-mono px-2.5 py-0.5 rounded-full shadow-sm">
                       <i data-lucide="crown" class="w-2.5 h-2.5"></i> Rank 1
                     </span>
                   ` : ''}
@@ -2597,16 +2635,18 @@
             <td class="px-6 py-4 text-right font-medium text-slate-700 font-mono">${p.advancePaid || 0}%</td>
             <td class="px-6 py-4 text-right font-medium text-slate-700">${p.teamSize || 1} Persons</td>
             <td class="px-6 py-4 text-xs text-slate-650">${p.albumIncluded || 'No'}</td>
-            <td class="px-6 py-4">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="editPhotographer('${p.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl transition shadow-sm cursor-pointer" title="Edit">
-                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                </button>
-                <button onclick="deletePhotographerDialog('${p.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 hover:text-rose-700 rounded-xl transition shadow-sm cursor-pointer" title="Delete">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-            </td>
+            ${state.isEditor ? `
+              <td class="px-6 py-4">
+                <div class="flex items-center justify-center gap-2">
+                  <button onclick="editPhotographer('${p.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl transition shadow-sm cursor-pointer" title="Edit">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="deletePhotographerDialog('${p.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 hover:text-rose-700 rounded-xl transition shadow-sm cursor-pointer" title="Delete">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </td>
+            ` : ''}
           </tr>
         `;
       });
@@ -2623,7 +2663,7 @@
               <th class="px-6 py-4 text-right">Advance %</th>
               <th class="px-6 py-4 text-right">Team Size</th>
               <th class="px-6 py-4">Album</th>
-              <th class="px-6 py-4 text-center">Actions</th>
+              ${state.isEditor ? '<th class="px-6 py-4 text-center">Actions</th>' : ''}
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -2768,15 +2808,17 @@
             </div>
 
             <!-- Actions -->
-            <div class="flex gap-2 border-t border-slate-100 pt-3">
-              <button onclick="editPhotographer('${p.id}')" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs transition shadow-sm cursor-pointer">
-                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                <span>Edit</span>
-              </button>
-              <button onclick="deletePhotographerDialog('${p.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 hover:text-rose-700 rounded-xl text-xs transition shadow-sm cursor-pointer">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
+            ${state.isEditor ? `
+              <div class="flex gap-2 border-t border-slate-100 pt-3">
+                <button onclick="editPhotographer('${p.id}')" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs transition shadow-sm cursor-pointer">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  <span>Edit</span>
+                </button>
+                <button onclick="deletePhotographerDialog('${p.id}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 hover:text-rose-700 rounded-xl text-xs transition shadow-sm cursor-pointer">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            ` : ''}
           `;
           gridDiv.appendChild(card);
         });
@@ -2840,24 +2882,32 @@
         tr.innerHTML = `
           <td class="py-4 px-6 font-semibold text-slate-800">${item.name}</td>
           <td class="py-4 px-6 text-center">
-            <select onchange="updateShoppingStatus('${item.id}', this.value)" class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadges[item.status]} bg-white focus:outline-none cursor-pointer">
-              <option value="Not Started" ${item.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
-              <option value="In Progress" ${item.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-              <option value="Sourced" ${item.status === 'Sourced' ? 'selected' : ''}>Sourced</option>
-            </select>
+            ${state.isEditor ? `
+              <select onchange="updateShoppingStatus('${item.id}', this.value)" class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadges[item.status]} bg-white focus:outline-none cursor-pointer">
+                <option value="Not Started" ${item.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
+                <option value="In Progress" ${item.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                <option value="Sourced" ${item.status === 'Sourced' ? 'selected' : ''}>Sourced</option>
+              </select>
+            ` : `
+              <span class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadges[item.status]} text-center max-w-[110px]">
+                ${item.status}
+              </span>
+            `}
           </td>
           <td class="py-4 px-6 text-slate-600 font-mono">${item.quantity}</td>
           <td class="py-4 px-6 text-slate-800 font-semibold font-mono">₹${parseFloat(item.budget).toLocaleString('en-IN')}</td>
           <td class="py-4 px-6 text-slate-500 italic text-xs truncate max-w-[200px]" title="${item.notes || ''}">${item.notes || '—'}</td>
           <td class="py-4 px-6 text-right">
-            <div class="flex items-center justify-end gap-1.5">
-              <button onclick="editShoppingItem('${item.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition shadow-sm">
-                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="deleteShoppingItemDialog('${item.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-lg transition shadow-sm">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
+            ${state.isEditor ? `
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="editShoppingItem('${item.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition shadow-sm">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="deleteShoppingItemDialog('${item.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-lg transition shadow-sm">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            ` : '—'}
           </td>
         `;
         tbody.appendChild(tr);
@@ -2940,11 +2990,17 @@
           </td>
           <td class="py-4 px-6 text-center font-mono font-bold text-slate-700">+ ${g.accompanyingCount} <span class="text-xs text-slate-400 font-normal">(Total: ${parseInt(g.accompanyingCount) + 1})</span></td>
           <td class="py-4 px-6 text-center">
-            <select onchange="updateGuestRsvp('${g.id}', this.value)" class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${rsvpClasses[g.rsvpStatus]} bg-white focus:outline-none cursor-pointer">
-              <option value="Invited" ${g.rsvpStatus === 'Invited' ? 'selected' : ''}>Invited</option>
-              <option value="Confirmed" ${g.rsvpStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-              <option value="Declined" ${g.rsvpStatus === 'Declined' ? 'selected' : ''}>Declined</option>
-            </select>
+            ${state.isEditor ? `
+              <select onchange="updateGuestRsvp('${g.id}', this.value)" class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${rsvpClasses[g.rsvpStatus]} bg-white focus:outline-none cursor-pointer">
+                <option value="Invited" ${g.rsvpStatus === 'Invited' ? 'selected' : ''}>Invited</option>
+                <option value="Confirmed" ${g.rsvpStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                <option value="Declined" ${g.rsvpStatus === 'Declined' ? 'selected' : ''}>Declined</option>
+              </select>
+            ` : `
+              <span class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${rsvpClasses[g.rsvpStatus]} text-center max-w-[110px]">
+                ${g.rsvpStatus}
+              </span>
+            `}
           </td>
           <td class="py-4 px-6 text-slate-600">
             <div class="flex flex-col">
@@ -2953,14 +3009,16 @@
             </div>
           </td>
           <td class="py-4 px-6 text-right">
-            <div class="flex items-center justify-end gap-1.5">
-              <button onclick="editGuest('${g.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition shadow-sm">
-                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="deleteGuestDialog('${g.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-lg transition shadow-sm">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
+            ${state.isEditor ? `
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="editGuest('${g.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition shadow-sm">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="deleteGuestDialog('${g.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-lg transition shadow-sm">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            ` : '—'}
           </td>
         `;
         tbody.appendChild(tr);
@@ -2988,8 +3046,8 @@
 
         item.innerHTML = `
           <input type="checkbox" ${task.status === 'Completed' ? 'checked' : ''} 
-            onchange="toggleTaskStatus('${task.id}', this.checked)" 
-            class="w-4 h-4 rounded border-slate-300 bg-white text-indigo-650 focus:ring-0 cursor-pointer mt-1">
+            ${state.isEditor ? `onchange="toggleTaskStatus('${task.id}', this.checked)"` : 'disabled'} 
+            class="w-4 h-4 rounded border-slate-300 bg-white text-indigo-650 focus:ring-0 ${state.isEditor ? 'cursor-pointer' : 'cursor-not-allowed'} mt-1">
           
           <div class="flex-1">
             <span class="text-sm font-semibold leading-snug break-words ${task.status === 'Completed'
@@ -3000,11 +3058,13 @@
             <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-500 font-mono">
               <span>Status: <span class="${task.status === 'Completed' ? 'text-emerald-650 font-semibold' : 'text-amber-600 font-semibold'}">${task.status || 'Pending'}</span></span>
               
-              <div class="flex gap-1.5 opacity-80 hover:opacity-100 transition">
-                <button onclick="editTask('${task.id}')" class="hover:text-indigo-650 text-slate-500">Edit</button>
-                <span>•</span>
-                <button onclick="deleteTaskDialog('${task.id}')" class="hover:text-rose-600 text-slate-500">Delete</button>
-              </div>
+              ${state.isEditor ? `
+                <div class="flex gap-1.5 opacity-80 hover:opacity-100 transition">
+                  <button onclick="editTask('${task.id}')" class="hover:text-indigo-650 text-slate-500">Edit</button>
+                  <span>•</span>
+                  <button onclick="deleteTaskDialog('${task.id}')" class="hover:text-rose-600 text-slate-500">Delete</button>
+                </div>
+              ` : ''}
             </div>
           </div>
         `;
@@ -3626,23 +3686,31 @@
           <td class="py-4 px-6 font-semibold text-slate-800">${exp.title}</td>
           <td class="py-4 px-6 font-mono text-xs text-indigo-650 font-semibold">${exp.category}</td>
           <td class="py-4 px-6 text-center">
-            <select onchange="updateExpenseStatus('${exp.id}', this.value)" class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadges[exp.status]} bg-white focus:outline-none cursor-pointer">
-              <option value="Paid" ${exp.status === 'Paid' ? 'selected' : ''}>Paid</option>
-              <option value="Pending" ${exp.status === 'Pending' ? 'selected' : ''}>Pending</option>
-            </select>
+            ${state.isEditor ? `
+              <select onchange="updateExpenseStatus('${exp.id}', this.value)" class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadges[exp.status]} bg-white focus:outline-none cursor-pointer">
+                <option value="Paid" ${exp.status === 'Paid' ? 'selected' : ''}>Paid</option>
+                <option value="Pending" ${exp.status === 'Pending' ? 'selected' : ''}>Pending</option>
+              </select>
+            ` : `
+              <span class="mx-auto block px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadges[exp.status]} text-center max-w-[100px]">
+                ${exp.status}
+              </span>
+            `}
           </td>
           <td class="py-4 px-6 text-slate-850 font-bold font-mono">₹${parseFloat(exp.amount).toLocaleString('en-IN')}</td>
           <td class="py-4 px-6 text-slate-700">${exp.vendor || '—'}</td>
           <td class="py-4 px-6 text-slate-500 italic text-xs truncate max-w-[200px]" title="${exp.remarks || ''}">${exp.remarks || '—'}</td>
           <td class="py-4 px-6 text-right">
-            <div class="flex items-center justify-end gap-1.5">
-              <button onclick="editExpense('${exp.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition shadow-sm">
-                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="deleteExpenseDialog('${exp.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-lg transition shadow-sm">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
+            ${state.isEditor ? `
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="editExpense('${exp.id}')" class="p-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg transition shadow-sm">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="deleteExpenseDialog('${exp.id}')" class="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-lg transition shadow-sm">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            ` : '—'}
           </td>
         `;
         tbody.appendChild(tr);
